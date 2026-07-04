@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ali Mabrouk — Data Analyst</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #1f1f2e;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.15s ease;
+    opacity: 0.5;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    border-bottom: 1px solid transparent;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(0px);
+  }
+  nav.scrolled {
+    border-color: var(--border);
+    backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.8);
+  }
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .nav-links { display: flex; gap: 2.5rem; }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.3;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+    top: 50%; left: 30%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+  .hero-glow2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 70%);
+    top: 30%; right: 10%;
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 800px; }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-name {
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  .hero-name .line1 { display: block; color: var(--text); }
+  .hero-name .line2 {
+    display: block;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--muted);
+  }
+
+  .hero-desc {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    padding: 0.85rem 2rem;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    cursor: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  .btn-primary:hover { background: #fff; transform: translateY(-2px); }
+
+  .btn-ghost {
+    padding: 0.85rem 2rem;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    cursor: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hero-stats {
+    position: absolute;
+    right: 4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    z-index: 2;
+  }
+  .stat {
+    text-align: right;
+    border-right: 2px solid var(--accent);
+    padding-right: 1.5rem;
+  }
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.3rem;
+    display: block;
+  }
+
+  /* SECTIONS */
+  section { padding: 6rem 4rem; position: relative; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* SKILLS */
+  #skills { background: var(--surface); }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .skill-card {
+    background: var(--card);
+    padding: 2rem;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.3s ease;
+  }
+  .skill-card:hover::before { height: 100%; }
+  .skill-card:hover { background: #1a1a26; }
+
+  .skill-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .skill-name {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.2rem 0.6rem;
+    letter-spacing: 0.05em;
+  }
+  .tag.accent { border-color: var(--accent); color: var(--accent); }
+
+  /* PROJECTS */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .project-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,212,255,0.03) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .project-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-4px); }
+  .project-card:hover::after { opacity: 1; }
+
+  .project-type {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .project-type::before {
+    content: '';
+    display: block;
+    width: 16px; height: 1px;
+    background: var(--accent);
+  }
+
+  .project-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .project-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    flex: 1;
+  }
+
+  .project-highlights {
+    list-style: none;
+    margin-bottom: 1.5rem;
+  }
+  .project-highlights li {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.5;
+  }
+  .project-highlights li::before {
+    content: '→';
+    color: var(--accent3);
+    flex-shrink: 0;
+  }
+
+  .project-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  /* SQL PROJECT SPECIAL */
+  .project-card.featured {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  .project-card.featured .project-left { }
+  .project-card.featured .project-right {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.8;
+    overflow: hidden;
+    position: relative;
+  }
+  .code-line { display: block; }
+  .code-keyword { color: #c678dd; }
+  .code-fn { color: #61afef; }
+  .code-str { color: #98c379; }
+  .code-comment { color: #5c6370; }
+  .code-num { color: #d19a66; }
+
+  /* EXPERIENCE */
+  #experience { background: var(--surface); }
+
+  .exp-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 3rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .exp-item:last-child { border-bottom: none; }
+
+  .exp-date {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    padding-top: 0.25rem;
+  }
+  .exp-role {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.01em;
+  }
+  .exp-company {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .exp-bullets { list-style: none; }
+  .exp-bullets li {
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: 0.35rem 0;
+    display: flex;
+    gap: 0.75rem;
+    line-height: 1.6;
+  }
+  .exp-bullets li::before { content: '▸'; color: var(--accent3); flex-shrink: 0; }
+
+  /* CONTACT */
+  #contact {
+    text-align: center;
+    padding: 8rem 4rem;
+  }
+  .contact-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .contact-title {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    line-height: 1;
+  }
+  .contact-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 3rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+  .contact-link {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+  }
+  .contact-link:hover { color: var(--accent); }
+  .contact-link span { font-size: 1rem; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .footer-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent3);
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    background: var(--accent3);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ANIMATIONS */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .fade-up:nth-child(2) { transition-delay: 0.1s; }
+  .fade-up:nth-child(3) { transition-delay: 0.2s; }
+  .fade-up:nth-child(4) { transition-delay: 0.3s; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .hero { padding: 0 1.5rem; }
+    .hero-stats { display: none; }
+    .exp-item { grid-template-columns: 1fr; gap: 0.5rem; }
+    .project-card.featured { grid-template-columns: 1fr; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+  }
+
+  .btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1rem;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .2s;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .03em;
+  }
+  .btn-view:hover {
+    background: var(--accent);
+    color: #000;
+    transform: translateY(-2px);
+  }
+  .btn-view-ghost {
+    border-color: rgba(0,212,255,.4);
+    color: rgba(0,212,255,.8);
+  }
+  .btn-view-ghost:hover {
+    background: rgba(0,212,255,.1);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .card-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: .5rem;
+    position: relative;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">AM_PORTFOLIO.exe</div>
+  <div class="nav-links">
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+    <a href="https://github.com/alimabrouk12596-data" target="_blank" title="GitHub" style="opacity:.7;transition:.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">🐙 GitHub</a>
+    <a href="https://www.linkedin.com/in/ali-mabrouk-524966164" target="_blank" title="LinkedIn" style="opacity:.7;transition:.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">💼 LinkedIn</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Available for remote opportunities</div>
+    <h1 class="hero-name">
+      <span class="line1">Ali Mabrouk</span>
+      <span class="line2">Amin</span>
+    </h1>
+    <p class="hero-desc">
+      Data Analyst & QC Engineer turning messy datasets into clear decisions.
+      Specialized in SQL, Excel, and data visualization — with a sharp eye for quality.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">View Projects →</a>
+      <a href="mailto:alimabrouk12596@gmail.com" class="btn-ghost">✉ Get in Touch</a>
+      <a href="https://github.com/alimabrouk12596-data" target="_blank" class="btn-ghost">🐙 GitHub</a>
+      <a href="https://www.linkedin.com/in/ali-mabrouk-524966164" target="_blank" class="btn-ghost">💼 LinkedIn</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">11+</span>
+      <span class="stat-label">Projects</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">3+</span>
+      <span class="stat-label">Years QC Exp</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">100%</span>
+      <span class="stat-label">Data Accuracy</span>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Technical Skills</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-card fade-up">
+      <div class="skill-icon">🗄️</div>
+      <div class="skill-name">Data Analysis & SQL</div>
+      <p style="color:var(--muted);font-size:0.85rem;line-height:1.6;">Querying, cleaning, and extracting insights from relational databases using advanced SQL techniques.</p>
+      <div class="skill-tags">
+        <span class="tag accent">PostgreSQL</span>
+        <span class="tag accent">MySQL</span>
+        <span class="tag">Data Cleaning</span>
+        <span class="tag">Window Functions</span>
+        <span class="tag">CTEs</span>
+      </div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">📊</div>
+      <div class="skill-name">Advanced Excel</div>
+      <p style="color:var(--muted);font-size:0.85rem;line-height:1.6;">Building automated dashboards and data pipelines using Excel's most powerful features.</p>
+      <div class="skill-tags">
+        <span class="tag accent">Power Query</span>
+        <span class="tag accent">Pivot Tables</span>
+        <span class="tag">XLOOKUP</span>
+        <span class="tag">INDEX/MATCH</span>
+        <span class="tag">Charts</span>
+      </div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">📈</div>
+      <div class="skill-name">Data Visualization</div>
+      <p style="color:var(--muted);font-size:0.85rem;line-height:1.6;">Translating raw numbers into interactive dashboards and compelling visual stories.</p>
+      <div class="skill-tags">
+        <span class="tag accent">Tableau</span>
+        <span class="tag accent">Power BI</span>
+        <span class="tag accent">Python (Pandas)</span>
+        <span class="tag">Dashboards</span>
+        <span class="tag">KPI Reporting</span>
+        <span class="tag">Storytelling</span>
+      </div>
+    </div>
+    <div class="skill-card fade-up">
+      <div class="skill-icon">✅</div>
+      <div class="skill-name">Quality Assurance</div>
+      <p style="color:var(--muted);font-size:0.85rem;line-height:1.6;">Engineering-grade attention to detail applied to data integrity and documentation.</p>
+      <div class="skill-tags">
+        <span class="tag accent">QC Protocols</span>
+        <span class="tag">Audit Documentation</span>
+        <span class="tag">Discrepancy Reporting</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Projects</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="projects-grid">
+
+    <!-- EPL Featured Project -->
+    <div class="project-card featured fade-up">
+      <div class="project-left">
+        <div class="project-type">SQL + Excel · MySQL · Dashboard</div>
+        <h3 class="project-title">Premier League 2024/25 — Player Statistics Analysis</h3>
+        <p class="project-desc">
+          Full-stack data analytics project on 562 Premier League players across 21 clubs. Built a complete pipeline from raw data to interactive Excel dashboard, using MySQL for cleaning and EDA, and Excel for visualization.
+        </p>
+        <ul class="project-highlights">
+          <li>Analyzed 562 players across 21 clubs and 64 nationalities using 57 statistical columns</li>
+          <li>Built 15 SQL queries covering top scorers, club rankings, position analysis, and discipline tables</li>
+          <li>Used DENSE_RANK(), CTEs, and window functions to rank players within each position</li>
+          <li>Key finding: Mohamed Salah top scorer (29 goals), Liverpool top club (72 goals), Forwards = 54% of goals</li>
+          <li>Built interactive Excel dashboard with KPI cards, 4 charts, and full data sheets</li>
+        </ul>
+        <div class="project-tools">
+          <span class="tag accent">MySQL</span>
+          <span class="tag accent">Excel</span>
+          <span class="tag">Window Functions</span>
+          <span class="tag">CTEs</span>
+          <span class="tag">Dashboard</span>
+          <span class="tag">EDA</span>
+          <div class="card-actions">
+            <a href="epl_dashboard.html" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+            <a href="https://github.com/alimabrouk12596-data/EPL-Analysis-24-25" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-right">
+        <span class="code-comment code-line">-- Top players ranked within each position</span>
+        <span class="code-line"><span class="code-keyword">WITH</span> PlayerRanks <span class="code-keyword">AS</span> (</span>
+        <span class="code-line">  <span class="code-keyword">SELECT</span> Player_Name, Club, Position,</span>
+        <span class="code-line">    Goals, Assists,</span>
+        <span class="code-line">    Goals + Assists <span class="code-keyword">AS</span> contributions,</span>
+        <span class="code-line">    <span class="code-fn">DENSE_RANK</span>() <span class="code-keyword">OVER</span> (</span>
+        <span class="code-line">      <span class="code-keyword">PARTITION BY</span> Position</span>
+        <span class="code-line">      <span class="code-keyword">ORDER BY</span> Goals + Assists <span class="code-keyword">DESC</span></span>
+        <span class="code-line">    ) <span class="code-keyword">AS</span> rank_in_position</span>
+        <span class="code-line">  <span class="code-keyword">FROM</span> epl_player_stats_24_25</span>
+        <span class="code-line">  <span class="code-keyword">WHERE</span> Appearances >= <span class="code-num">10</span></span>
+        <span class="code-line">)</span>
+        <span class="code-line"><span class="code-keyword">SELECT</span> * <span class="code-keyword">FROM</span> PlayerRanks</span>
+        <span class="code-line"><span class="code-keyword">WHERE</span> rank_in_position <= <span class="code-num">5</span>;</span>
+        <br>
+        <span class="code-comment code-line">-- Key findings</span>
+        <span class="code-line"><span class="code-comment">-- 🥇 Salah: 29G | 18A | 47 contributions</span></span>
+        <span class="code-line"><span class="code-comment">-- 🏆 Liverpool: 72 goals (top club)</span></span>
+        <span class="code-line"><span class="code-comment">-- ⚡ FWD: 54% of all goals scored</span></span>
+        <span class="code-line"><span class="code-comment">-- 🌍 64 nationalities represented</span></span>
+      </div>
+    </div>
+
+    <!-- SQL Featured -->
+    <div class="project-card featured fade-up">
+      <div class="project-left">
+        <div class="project-type">SQL · MySQL</div>
+        <h3 class="project-title">Global Layoffs — Data Cleaning & EDA</h3>
+        <p class="project-desc">
+          End-to-end SQL project on a real-world global layoffs dataset. Built a full data cleaning pipeline then performed exploratory analysis to surface industry and company-level trends.
+        </p>
+        <ul class="project-highlights">
+          <li>Removed duplicate records using ROW_NUMBER() window functions with full partition logic</li>
+          <li>Standardized inconsistent values: trimmed whitespace, unified industry labels, fixed date formats using STR_TO_DATE()</li>
+          <li>Handled NULL values via self-JOIN to populate missing industries from matching companies</li>
+          <li>Ranked top 5 companies by layoffs per year using DENSE_RANK() inside CTEs</li>
+          <li>Built rolling monthly totals using SUM() OVER() for trend visibility</li>
+        </ul>
+        <div class="project-tools">
+          <span class="tag accent">MySQL</span>
+          <span class="tag">CTEs</span>
+          <span class="tag">Window Functions</span>
+          <span class="tag">Data Cleaning</span>
+          <span class="tag">EDA</span>
+        </div>
+      </div>
+      <div class="project-right">
+        <span class="code-comment code-line">-- Rolling monthly layoff totals</span>
+        <span class="code-line"><span class="code-keyword">WITH</span> Rolling_Total <span class="code-keyword">AS</span> (</span>
+        <span class="code-line">  <span class="code-keyword">SELECT</span></span>
+        <span class="code-line">    <span class="code-fn">SUBSTRING</span>(`date`,<span class="code-num">1</span>,<span class="code-num">7</span>) <span class="code-keyword">AS</span> Month,</span>
+        <span class="code-line">    <span class="code-fn">SUM</span>(total_laid_off) <span class="code-keyword">AS</span> total_off</span>
+        <span class="code-line">  <span class="code-keyword">FROM</span> layoffs_staging2</span>
+        <span class="code-line">  <span class="code-keyword">WHERE</span> <span class="code-fn">SUBSTRING</span>(`date`,<span class="code-num">1</span>,<span class="code-num">7</span>) <span class="code-keyword">IS NOT NULL</span></span>
+        <span class="code-line">  <span class="code-keyword">GROUP BY</span> Month</span>
+        <span class="code-line">  <span class="code-keyword">ORDER BY</span> <span class="code-num">1</span> <span class="code-keyword">ASC</span></span>
+        <span class="code-line">)</span>
+        <span class="code-line"><span class="code-keyword">SELECT</span> Month, total_off,</span>
+        <span class="code-line">  <span class="code-fn">SUM</span>(total_off) <span class="code-keyword">OVER</span>(</span>
+        <span class="code-line">    <span class="code-keyword">ORDER BY</span> Month</span>
+        <span class="code-line">  ) <span class="code-keyword">AS</span> rolling_total</span>
+        <span class="code-line"><span class="code-keyword">FROM</span> Rolling_Total;</span>
+        <br>
+        <span class="code-comment code-line">-- Top 5 companies by year</span>
+        <span class="code-line"><span class="code-keyword">WITH</span> Company_year <span class="code-keyword">AS</span> (</span>
+        <span class="code-line">  <span class="code-keyword">SELECT</span> company,</span>
+        <span class="code-line">    <span class="code-fn">YEAR</span>(`date`), <span class="code-fn">SUM</span>(total_laid_off)</span>
+        <span class="code-line">  <span class="code-keyword">FROM</span> layoffs_staging2</span>
+        <span class="code-line">  <span class="code-keyword">GROUP BY</span> company, <span class="code-fn">YEAR</span>(`date`)</span>
+        <span class="code-line">), Ranked <span class="code-keyword">AS</span> (</span>
+        <span class="code-line">  <span class="code-keyword">SELECT</span> *,</span>
+        <span class="code-line">  <span class="code-fn">DENSE_RANK</span>() <span class="code-keyword">OVER</span> (</span>
+        <span class="code-line">    <span class="code-keyword">PARTITION BY</span> years</span>
+        <span class="code-line">    <span class="code-keyword">ORDER BY</span> total_laid_off <span class="code-keyword">DESC</span></span>
+        <span class="code-line">  ) <span class="code-keyword">AS</span> Ranking</span>
+        <span class="code-line">  <span class="code-keyword">FROM</span> Company_year</span>
+        <span class="code-line">)</span>
+        <span class="code-line"><span class="code-keyword">SELECT</span> * <span class="code-keyword">FROM</span> Ranked</span>
+        <span class="code-line"><span class="code-keyword">WHERE</span> Ranking &lt;= <span class="code-num">5</span>;</span>
+      </div>
+    </div>
+
+    <!-- Tableau / Airbnb Seattle -->
+    <div class="project-card featured fade-up">
+      <div class="project-left">
+        <div class="project-type">Tableau · Multi-Dataset Analysis</div>
+        <h3 class="project-title">Airbnb Seattle — Full Market Analysis Dashboard</h3>
+        <p class="project-desc">
+          End-to-end analytics project joining 3 real-world datasets (3,818 listings · 1M+ calendar records · 84,849 reviews) to uncover pricing patterns, occupancy trends, and seasonal demand cycles across Seattle's short-term rental market.
+        </p>
+        <ul class="project-highlights">
+          <li>Joined Listings + Calendar + Reviews on listing_id to build a unified star-schema model</li>
+          <li>ZIP 98134 (SoDo) leads avg pricing at $206.6/night — waterfront proximity drives premium</li>
+          <li>January occupancy (43.7%) beats summer despite lower prices — conference demand signal</li>
+          <li>6-bedroom listings earn 6× more than 1-bedrooms ($578 vs $95.7/night)</li>
+          <li>August review volume is 4.5× higher than February — validates true seasonal demand</li>
+          <li>Built 6-sheet interactive dashboard: Price by ZIP, Map, Revenue/Year, Avg Price/Bedroom, Listings Count, Full Dashboard</li>
+        </ul>
+        <div class="project-tools">
+          <span class="tag accent">Tableau</span>
+          <span class="tag accent">Python</span>
+          <span class="tag">Multi-Dataset Join</span>
+          <span class="tag">Occupancy Analysis</span>
+          <span class="tag">Geo Mapping</span>
+          <span class="tag">Seasonality</span>
+          <div class="card-actions">
+            <a href="airbnb_seattle_dashboard.html" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+            <a href="https://github.com/alimabrouk12596-data/Airbnb-Seattle-Analysis" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-right">
+        <span class="code-comment code-line">-- Seattle Airbnb · 3 datasets joined</span>
+        <span class="code-line"><span class="code-comment">-- Listings × Calendar × Reviews</span></span>
+        <br>
+        <span class="code-comment code-line">-- Avg price by ZIP (top results)</span>
+        <span class="code-line"><span class="code-keyword">SELECT</span> zipcode,</span>
+        <span class="code-line">  <span class="code-fn">ROUND</span>(<span class="code-fn">AVG</span>(price), <span class="code-num">1</span>) <span class="code-keyword">AS</span> avg_price,</span>
+        <span class="code-line">  <span class="code-fn">COUNT</span>(*) <span class="code-keyword">AS</span> listings</span>
+        <span class="code-line"><span class="code-keyword">FROM</span> listings</span>
+        <span class="code-line"><span class="code-keyword">GROUP BY</span> zipcode</span>
+        <span class="code-line"><span class="code-keyword">ORDER BY</span> avg_price <span class="code-keyword">DESC</span>;</span>
+        <br>
+        <span class="code-comment code-line">-- Monthly occupancy rate</span>
+        <span class="code-line"><span class="code-keyword">SELECT</span></span>
+        <span class="code-line">  <span class="code-fn">MONTH</span>(date) <span class="code-keyword">AS</span> month,</span>
+        <span class="code-line">  <span class="code-fn">ROUND</span>(<span class="code-fn">SUM</span>(available=<span class="code-str">'f'</span>)*<span class="code-num">100.0</span></span>
+        <span class="code-line">    / <span class="code-fn">COUNT</span>(*), <span class="code-num">1</span>) <span class="code-keyword">AS</span> occupancy_pct</span>
+        <span class="code-line"><span class="code-keyword">FROM</span> calendar</span>
+        <span class="code-line"><span class="code-keyword">GROUP BY</span> month;</span>
+        <br>
+        <span class="code-comment code-line">-- Key findings</span>
+        <span class="code-line"><span class="code-comment">-- 📍 ZIP 98134: $206.6 avg (highest)</span></span>
+        <span class="code-line"><span class="code-comment">-- 📅 Jan: 43.7% occupancy (peak)</span></span>
+        <span class="code-line"><span class="code-comment">-- 🛏️ 6BR: $578 vs 1BR: $95.7/night</span></span>
+      </div>
+    </div>
+
+    <!-- Power BI Project -->
+    <div class="project-card featured fade-up">
+      <div class="project-left">
+        <div class="project-type">Power BI · Survey Analysis · HR Analytics</div>
+        <h3 class="project-title">Data Professionals Survey — Global Salary & Job Satisfaction Breakdown</h3>
+        <p class="project-desc">
+          Interactive Power BI dashboard analyzing real survey responses from data professionals worldwide — covering salaries, job satisfaction, career paths, and demographic breakdowns across Data Analysts, Data Scientists, and related roles.
+        </p>
+        <ul class="project-highlights">
+          <li>Analyzed survey data from data professionals across multiple countries and job titles</li>
+          <li>Broke down average salaries by role, gender, and country to surface compensation gaps</li>
+          <li>Measured job satisfaction scores across salary, work-life balance, and management dimensions</li>
+          <li>Visualized career entry difficulty, preferred programming languages, and industry distribution</li>
+          <li>Built fully interactive dashboard with slicers for role, country, and gender filtering</li>
+        </ul>
+        <div class="project-tools">
+          <span class="tag accent">Power BI</span>
+          <span class="tag accent">DAX</span>
+          <span class="tag">Survey Analysis</span>
+          <span class="tag">HR Analytics</span>
+          <span class="tag">Data Cleaning</span>
+          <span class="tag">KPI Cards</span>
+          <div class="card-actions">
+            <a href="powerbi_dashboard.html" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+            <a href="https://github.com/alimabrouk12596-data/Data-Professionals-Survey" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-right">
+        <span class="code-comment code-line">-- Survey Insights · Data Professionals</span>
+        <br>
+        <span class="code-comment code-line">-- Avg salary by job title</span>
+        <span class="code-line"><span class="code-keyword">SELECT</span> Job_Title,</span>
+        <span class="code-line">  <span class="code-fn">ROUND</span>(<span class="code-fn">AVG</span>(Salary_USD), <span class="code-num">0</span>) <span class="code-keyword">AS</span> avg_salary,</span>
+        <span class="code-line">  <span class="code-fn">COUNT</span>(*) <span class="code-keyword">AS</span> respondents</span>
+        <span class="code-line"><span class="code-keyword">FROM</span> survey_data</span>
+        <span class="code-line"><span class="code-keyword">GROUP BY</span> Job_Title</span>
+        <span class="code-line"><span class="code-keyword">ORDER BY</span> avg_salary <span class="code-keyword">DESC</span>;</span>
+        <br>
+        <span class="code-comment code-line">-- Satisfaction score by gender</span>
+        <span class="code-line"><span class="code-keyword">SELECT</span> Gender,</span>
+        <span class="code-line">  <span class="code-fn">ROUND</span>(<span class="code-fn">AVG</span>(Salary_Satisfaction), <span class="code-num">1</span>)</span>
+        <span class="code-line">    <span class="code-keyword">AS</span> avg_salary_satisfaction,</span>
+        <span class="code-line">  <span class="code-fn">ROUND</span>(<span class="code-fn">AVG</span>(WorkLife_Satisfaction), <span class="code-num">1</span>)</span>
+        <span class="code-line">    <span class="code-keyword">AS</span> avg_worklife_score</span>
+        <span class="code-line"><span class="code-keyword">FROM</span> survey_data</span>
+        <span class="code-line"><span class="code-keyword">GROUP BY</span> Gender;</span>
+        <br>
+        <span class="code-comment code-line">-- 🌍 Respondents from 20+ countries</span>
+        <span class="code-comment code-line">-- 📊 Roles: Analyst, Scientist, Engineer</span>
+        <span class="code-comment code-line">-- ⭐ Satisfaction tracked across 5 KPIs</span>
+      </div>
+    </div>
+
+    <!-- Excel Project 1 -->
+    <div class="project-card fade-up">
+      <div class="project-type">Excel · Dashboard</div>
+      <h3 class="project-title">Bike Buyers — Customer Analysis Dashboard</h3>
+      <p class="project-desc">
+        Full analysis of customer purchasing behavior across demographics, regions, and income levels. Built an interactive Excel dashboard with dynamic filters to explore who buys bikes and why.
+      </p>
+      <ul class="project-highlights">
+        <li>Analyzed 1,000+ customer records across income, age, education, and commute distance</li>
+        <li>Built Pivot Tables to segment buyers by region (Europe, Pacific, North America)</li>
+        <li>Created interactive dashboard with Slicers for real-time filtering by gender, marital status, and region</li>
+        <li>Identified that customers with 0–1 mile commutes and middle incomes had the highest purchase rates</li>
+      </ul>
+      <div class="project-tools">
+        <span class="tag accent">Excel</span>
+        <span class="tag">Pivot Tables</span>
+        <span class="tag">Slicers</span>
+        <span class="tag">Dashboard</span>
+        <span class="tag">Data Analysis</span>
+        <div class="card-actions">
+          <a href="excel_dashboard.html#bike" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+          <a href="https://github.com/alimabrouk12596-data/Excel-Projects" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Excel Project 2 -->
+    <div class="project-card fade-up">
+      <div class="project-type">Excel · Sales Analysis</div>
+      <h3 class="project-title">Global Sales Report — Multi-Country Revenue Dashboard</h3>
+      <p class="project-desc">
+        Comprehensive sales analysis across 6 countries (US, Australia, UK, Germany, France, Canada) spanning 2011–2016, with $85M+ in total revenue tracked.
+      </p>
+      <ul class="project-highlights">
+        <li>Built Pivot Table comparing Revenue, Cost, and Profit by country and year</li>
+        <li>Identified the United States as top market at $28M revenue, Australia second at $21M</li>
+        <li>Tracked year-over-year growth showing 2015 as peak year at $20M total revenue</li>
+        <li>Created dynamic charts to visualize revenue trends across product categories</li>
+      </ul>
+      <div class="project-tools">
+        <span class="tag accent">Excel</span>
+        <span class="tag">Pivot Tables</span>
+        <span class="tag">Charts</span>
+        <span class="tag">Sales Analysis</span>
+        <span class="tag">Revenue Tracking</span>
+        <div class="card-actions">
+          <a href="sales_dashboard.html" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+          <a href="https://github.com/alimabrouk12596-data/Global-Sales-Analysis" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Excel Project 3 -->
+    <div class="project-card fade-up">
+      <div class="project-type">Excel · Data Cleaning</div>
+      <h3 class="project-title">US Presidents Dataset — Data Cleaning & Standardization</h3>
+      <p class="project-desc">
+        Applied professional data cleaning techniques to a historical US Presidents dataset, fixing date formats, removing duplicates, and standardizing inconsistent entries.
+      </p>
+      <ul class="project-highlights">
+        <li>Identified and removed duplicate records (e.g. Woodrow Wilson duplicate row)</li>
+        <li>Converted Excel serial numbers to readable date formats</li>
+        <li>Standardized party names and removed extra whitespace using TRIM functions</li>
+        <li>Documented all cleaning steps for full reproducibility</li>
+      </ul>
+      <div class="project-tools">
+        <span class="tag accent">Excel</span>
+        <span class="tag">Data Cleaning</span>
+        <span class="tag">TRIM</span>
+        <span class="tag">Date Formatting</span>
+        <span class="tag">Deduplication</span>
+        <div class="card-actions">
+          <a href="excel_dashboard.html#clean" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+          <a href="https://github.com/alimabrouk12596-data/Excel-Projects" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- XLOOKUP Project -->
+    <div class="project-card fade-up">
+      <div class="project-type">Excel · Advanced Formulas</div>
+      <h3 class="project-title">HR Employee Lookup System — XLOOKUP & INDEX/MATCH</h3>
+      <p class="project-desc">
+        Built a dynamic employee data retrieval system using XLOOKUP with exact, partial, and multi-column match modes — demonstrating mastery of Excel's most powerful lookup functions.
+      </p>
+      <ul class="project-highlights">
+        <li>Implemented XLOOKUP with exact match, partial match, and wildcard scenarios</li>
+        <li>Built multi-column return to fetch Name, Email, Salary, and End Date in one formula</li>
+        <li>Added error handling using XLOOKUP's if_not_found parameter ("Not found")</li>
+        <li>Applied across employee dataset of 9 staff records with full HR data</li>
+      </ul>
+      <div class="project-tools">
+        <span class="tag accent">XLOOKUP</span>
+        <span class="tag">INDEX/MATCH</span>
+        <span class="tag">Error Handling</span>
+        <span class="tag">Excel</span>
+        <div class="card-actions">
+          <a href="excel_dashboard.html#formulas" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+          <a href="https://github.com/alimabrouk12596-data/Excel-Projects" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conditional Formatting -->
+    <div class="project-card fade-up">
+      <div class="project-type">Excel · Visualization</div>
+      <h3 class="project-title">Sales & HR Dashboard — Conditional Formatting & Charts</h3>
+      <p class="project-desc">
+        Applied advanced conditional formatting rules and chart design to visualize monthly sales data for Dunder Mifflin paper products and employee HR metrics.
+      </p>
+      <ul class="project-highlights">
+        <li>Applied color-scale conditional formatting to highlight performance outliers</li>
+        <li>Tracked 12-month sales across 3 product lines (Paper, Printers, Manila Folders)</li>
+        <li>Built bar and line charts for Sales Report with Year End Totals</li>
+        <li>Combined HR demographic data with salary ranges for visual reporting</li>
+      </ul>
+      <div class="project-tools">
+        <span class="tag accent">Conditional Formatting</span>
+        <span class="tag">Charts</span>
+        <span class="tag">Excel</span>
+        <span class="tag">Data Visualization</span>
+        <div class="card-actions">
+          <a href="excel_dashboard.html#sales" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+          <a href="https://github.com/alimabrouk12596-data/Excel-Projects" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Web Scraping Project -->
+    <div class="project-card featured fade-up">
+      <div class="project-left">
+        <div class="project-type">Python · BeautifulSoup · Pandas · Web Scraping</div>
+        <h3 class="project-title">US Fortune 500 — Web Scraping & Revenue Analysis</h3>
+        <p class="project-desc">
+          Built a complete web scraping pipeline in Python to extract the largest US companies by revenue directly from Wikipedia's HTML — no API, no CSV download. Parsed raw HTML tables using BeautifulSoup, structured data with Pandas, and surfaced key revenue and industry insights.
+        </p>
+        <ul class="project-highlights">
+          <li>Scraped 50+ companies across 7 data columns using requests + BeautifulSoup HTML parsing</li>
+          <li>Applied browser-like User-Agent headers to handle bot detection on live web pages</li>
+          <li>Identified Healthcare (35%) as the dominant industry in the Fortune 500 top 20</li>
+          <li>Walmart leads at $648B revenue — 13% ahead of Amazon; Marathon Petroleum top growth at 74.4%</li>
+        </ul>
+        <div class="project-tools">
+          <span class="tag accent">Python</span>
+          <span class="tag accent">BeautifulSoup</span>
+          <span class="tag accent">Pandas</span>
+          <span class="tag">Requests</span>
+          <span class="tag">Web Scraping</span>
+          <span class="tag">Data Cleaning</span>
+          <div class="card-actions">
+            <a href="web_scraping_dashboard.html" target="_blank" class="btn-view">🚀 Live Dashboard →</a>
+            <a href="https://github.com/alimabrouk12596-data/Web-Scraping-Revenue-Analysis-US-Fortune-500" target="_blank" class="btn-view btn-view-ghost">🐙 GitHub Repo</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-right">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.2rem;font-family:var(--mono);font-size:0.75rem;line-height:1.8;height:100%;min-height:220px;">
+          <div style="color:var(--muted);margin-bottom:0.8rem;">scraping_fortune500.py</div>
+          <div><span style="color:#cba6f7">from</span> <span style="color:#89b4fa">bs4</span> <span style="color:#cba6f7">import</span> BeautifulSoup</div>
+          <div><span style="color:#cba6f7">import</span> requests, pandas <span style="color:#cba6f7">as</span> pd</div>
+          <div style="margin-top:0.5rem;color:#585b70"># Fetch Wikipedia table</div>
+          <div><span style="color:#f38ba8">page</span> = requests.<span style="color:#89b4fa">get</span>(url, headers=hdrs)</div>
+          <div><span style="color:#f38ba8">soup</span> = <span style="color:#89b4fa">BeautifulSoup</span>(page.text)</div>
+          <div><span style="color:#f38ba8">table</span> = soup.<span style="color:#89b4fa">find_all</span>(<span style="color:#a6e3a1">'table'</span>)[0]</div>
+          <div style="margin-top:0.5rem;color:#585b70"># Extract & structure data</div>
+          <div><span style="color:#cba6f7">for</span> row <span style="color:#cba6f7">in</span> column_data[1:]:</div>
+          <div>&nbsp;&nbsp;df.loc[<span style="color:#89b4fa">len</span>(df)] = row_data</div>
+          <div style="margin-top:0.5rem;color:#585b70"># Export</div>
+          <div>df.<span style="color:#89b4fa">to_csv</span>(<span style="color:#a6e3a1">'fortune500.csv'</span>)</div>
+          <div style="margin-top:1rem;padding:0.6rem;background:#00d4ff11;border:1px solid #00d4ff33;border-radius:4px;color:var(--accent)">✓ 50+ companies · 7 columns scraped</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Experience</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="exp-item fade-up">
+    <div class="exp-date">2023 — Present</div>
+    <div>
+      <div class="exp-role">Quality Control Engineer</div>
+      <div class="exp-company">PETROJET · Al-Minia, Egypt</div>
+      <ul class="exp-bullets">
+        <li>Performed rigorous quality audits and inspections ensuring all technical data met international standards across multiple projects</li>
+        <li>Developed detailed reports documenting discrepancies and recommended corrective actions</li>
+        <li>Managed complex documentation workflows for large-scale engineering projects with high precision</li>
+        <li>Coordinated between technical teams to verify data accuracy before final project sign-off</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="exp-item fade-up">
+    <div class="exp-date">Self-directed</div>
+    <div>
+      <div class="exp-role">Data Analytics — Independent Study</div>
+      <div class="exp-company">SQL · Excel · Tableau · Python</div>
+      <ul class="exp-bullets">
+        <li>Completed 7+ data projects covering the full analytics workflow: data collection, cleaning, analysis, and visualization</li>
+        <li>Studied SQL deeply with focus on window functions, CTEs, and complex joins on real-world datasets</li>
+        <li>Built interactive dashboards in Excel and Tableau for business intelligence use cases</li>
+        <li>Pursuing Google Analytics (GA4) certification as next credential milestone</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-eyebrow">Let's work together</div>
+  <h2 class="contact-title">Get In Touch</h2>
+  <p class="contact-sub">Open to remote data analyst roles and freelance analytics projects.</p>
+  <div class="contact-links">
+    <a href="mailto:alimabrouk12596@gmail.com" class="contact-link">
+      <span>✉</span> alimabrouk12596@gmail.com
+    </a>
+    <a href="tel:+201153861837" class="contact-link">
+      <span>📱</span> +201153861837
+    </a>
+    <a href="https://www.linkedin.com/in/ali-mabrouk-524966164" target="_blank" class="contact-link">
+      <span>💼</span> LinkedIn
+    </a>
+    <a href="https://github.com/alimabrouk12596-data" target="_blank" class="contact-link">
+      <span>🐙</span> GitHub
+    </a>
+    <a href="https://ali-data-analyst.netlify.app/" target="_blank" class="contact-link">
+      <span>🌐</span> Portfolio Site
+    </a>
+  </div>
+  <a href="mailto:alimabrouk12596@gmail.com" class="btn-primary">Start a Conversation →</a>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2026 Ali Mabrouk Amin — All rights reserved</div>
+  <div class="footer-status">
+    <div class="status-dot"></div>
+    Available for opportunities
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 6 + 'px';
+    cursor.style.top = my - 6 + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx - 18) * 0.12;
+    ry += (my - ry - 18) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Nav scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Fade in on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

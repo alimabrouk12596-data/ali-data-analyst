@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Professionals Survey — Ali Mabrouk</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #1f1f2e;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  .cursor {
+    position: fixed; width: 12px; height: 12px;
+    background: var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transition: transform 0.1s ease; mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed; width: 36px; height: 36px;
+    border: 1px solid var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transition: all 0.15s ease; opacity: 0.5;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1; opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 3rem;
+    border-bottom: 1px solid transparent;
+    transition: all 0.4s ease; backdrop-filter: blur(0px);
+  }
+  nav.scrolled {
+    border-color: var(--border);
+    backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.85);
+  }
+  .nav-logo { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 0.1em; text-decoration: none; }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a {
+    font-family: var(--mono); font-size: 0.72rem; color: var(--muted);
+    text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* PAGE HEADER */
+  .page-header {
+    padding: 7rem 3rem 3rem;
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px; opacity: 0.2;
+    mask-image: radial-gradient(ellipse 80% 100% at 20% 50%, black, transparent);
+  }
+  .header-tag {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--accent);
+    letter-spacing: 0.2em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;
+  }
+  .header-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--accent); }
+  .page-title {
+    font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 1rem;
+    position: relative; z-index: 2;
+  }
+  .page-title span { color: transparent; -webkit-text-stroke: 1px var(--accent); }
+  .page-desc {
+    font-size: 0.95rem; color: var(--muted); line-height: 1.7;
+    max-width: 560px; position: relative; z-index: 2; margin-bottom: 1.5rem;
+  }
+  .header-meta {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    position: relative; z-index: 2;
+  }
+  .meta-item { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.05em; }
+  .meta-item span { color: var(--accent); }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--mono); font-size: 0.72rem; color: var(--muted);
+    text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: color 0.2s; margin-bottom: 1.5rem; position: relative; z-index: 2;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  /* DASHBOARD AREA */
+  .dashboard-section {
+    padding: 3rem;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .kpi-card {
+    background: var(--card);
+    padding: 1.75rem 1.5rem;
+    position: relative; overflow: hidden;
+    transition: background 0.2s;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; width: 3px; height: 0;
+    transition: height 0.3s ease;
+  }
+  .kpi-card:hover::before { height: 100%; }
+  .kpi-card:hover { background: #1a1a26; }
+  .kpi-card.green::before { background: var(--accent3); }
+  .kpi-card.cyan::before { background: var(--accent); }
+  .kpi-card.orange::before { background: #f97316; }
+  .kpi-card.purple::before { background: var(--accent2); }
+  .kpi-label {
+    font-family: var(--mono); font-size: 0.65rem; color: var(--muted);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  .kpi-value { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .kpi-value.cyan { color: var(--accent); }
+  .kpi-value.green { color: var(--accent3); }
+  .kpi-value.orange { color: #f97316; }
+  .kpi-value.purple { color: var(--accent2); }
+  .kpi-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); margin-top: 0.5rem; }
+
+  /* CHARTS GRID */
+  .charts-main {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .charts-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: relative; overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .chart-card:hover { border-color: rgba(0,212,255,0.25); }
+  .chart-card-title {
+    font-family: var(--mono); font-size: 0.65rem; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .chart-card-title::before { content: ''; display: block; width: 12px; height: 1px; background: var(--accent); }
+
+  /* LEGEND */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 1rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 0.6rem; color: var(--muted); }
+  .legend-sq { width: 8px; height: 8px; border-radius: 1px; flex-shrink: 0; }
+
+  /* SATISFACTION BARS */
+  .sat-section { display: flex; flex-direction: column; gap: 1.5rem; }
+  .sat-item {}
+  .sat-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+  .sat-name { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  .sat-score-text { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+  .sat-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .sat-fill { height: 100%; border-radius: 3px; width: 0; transition: width 1.4s cubic-bezier(0.34, 1.2, 0.64, 1); }
+  .sat-range { display: flex; justify-content: space-between; margin-top: 0.4rem; }
+  .sat-range span { font-family: var(--mono); font-size: 0.55rem; color: var(--muted); }
+  .sat-verdict { font-family: var(--mono); font-size: 0.6rem; margin-top: 0.35rem; }
+
+  /* GENDER */
+  .gender-block { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .gender-label { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .gender-label::before { content: ''; display: block; width: 12px; height: 1px; background: var(--accent); }
+
+  /* FINDINGS */
+  .findings-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem 1.5rem;
+    margin-top: 2rem;
+  }
+  .findings-title { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1rem; }
+  .findings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  .finding { display: flex; gap: 0.75rem; align-items: flex-start; }
+  .finding-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+  .finding-text { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); line-height: 1.6; }
+  .finding-text strong { color: var(--text); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-copy { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.05em; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .nav-links { display: none; }
+    .page-header, .dashboard-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .charts-main, .charts-bottom { grid-template-columns: 1fr; }
+    footer { padding: 1.25rem 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav id="nav">
+  <a class="nav-logo" href="index.html">AM_PORTFOLIO.exe</a>
+  <div class="nav-links">
+    <a href="index.html#skills">Skills</a>
+    <a href="index.html#projects">Projects</a>
+    <a href="index.html#experience">Experience</a>
+    <a href="index.html#contact">Contact</a>
+    <a href="https://github.com/alimabrouk12596-data" target="_blank">🐙 GitHub</a>
+    <a href="https://www.linkedin.com/in/ali-mabrouk-524966164" target="_blank">💼 LinkedIn</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <a href="index.html" class="back-link">← Back to Portfolio</a>
+  <div class="header-tag">Power BI · Survey Analysis · HR Analytics</div>
+  <h1 class="page-title">Data Professionals Survey<br><span>Breakdown</span></h1>
+  <p class="page-desc">
+    Interactive dashboard analyzing real survey responses from 630 data professionals worldwide —
+    covering salaries, job satisfaction, career paths, and demographic breakdowns across
+    Data Analysts, Data Scientists, Engineers, and more.
+  </p>
+  <div class="header-meta">
+    <div class="meta-item">Tool: <span>Power BI + HTML/Chart.js</span></div>
+    <div class="meta-item">Respondents: <span>630</span></div>
+    <div class="meta-item">Countries: <span>20+</span></div>
+    <div class="meta-item">Roles: <span>7 job titles</span></div>
+    <div class="meta-item">GitHub: <span><a href="https://github.com/alimabrouk12596-data/Data-Professionals-Survey" target="_blank" style="color:var(--accent);text-decoration:none;">View Repo →</a></span></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard-section">
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card cyan">
+      <div class="kpi-label">Survey takers</div>
+      <div class="kpi-value cyan">630</div>
+      <div class="kpi-sub">Unique respondents</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Average age</div>
+      <div class="kpi-value purple">29.87</div>
+      <div class="kpi-sub">Years old</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Work/life happiness</div>
+      <div class="kpi-value green">5.74</div>
+      <div class="kpi-sub">Out of 10 — above average</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Salary happiness</div>
+      <div class="kpi-value orange">4.27</div>
+      <div class="kpi-sub">Out of 10 — below average</div>
+    </div>
+  </div>
+
+  <!-- MAIN ROW -->
+  <div class="charts-main">
+
+    <!-- Salary by job title -->
+    <div class="chart-card">
+      <div class="chart-card-title">Average salary by job title (k USD)</div>
+      <div style="position:relative;width:100%;height:280px;">
+        <canvas id="c-salary" role="img" aria-label="Horizontal bar chart showing average salary by job title. Data Scientist earns the most at 94k USD, Student/Looking the least at 27k.">
+          Data Scientist 94k, Data Engineer 65k, Data Architect 64k, Other 60k, Data Analyst 55k, Database Developer 33k, Student/Looking 27k.
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Satisfaction + Gender -->
+    <div class="chart-card">
+      <div class="chart-card-title">Satisfaction scores</div>
+      <div class="sat-section">
+        <div class="sat-item">
+          <div class="sat-header">
+            <div class="sat-name">Work / life balance</div>
+            <div class="sat-score-text" style="color:var(--accent3);">5.74</div>
+          </div>
+          <div class="sat-track"><div class="sat-fill" id="wl-fill" style="background:var(--accent3);"></div></div>
+          <div class="sat-range"><span>0</span><span>10</span></div>
+          <div class="sat-verdict" style="color:var(--accent3);">▲ Above average — professionals fairly content</div>
+        </div>
+        <div class="sat-item">
+          <div class="sat-header">
+            <div class="sat-name">Salary</div>
+            <div class="sat-score-text" style="color:#f97316;">4.27</div>
+          </div>
+          <div class="sat-track"><div class="sat-fill" id="sal-fill" style="background:#f97316;"></div></div>
+          <div class="sat-range"><span>0</span><span>10</span></div>
+          <div class="sat-verdict" style="color:#f97316;">▼ Below average — professionals feel underpaid</div>
+        </div>
+      </div>
+      <div class="gender-block">
+        <div class="gender-label">Gender split</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-sq" style="background:#00d4ff;"></div>Male (74.3%)</div>
+          <div class="legend-item"><div class="legend-sq" style="background:#10b981;"></div>Female (25.7%)</div>
+        </div>
+        <div style="position:relative;width:100%;height:110px;">
+          <canvas id="c-gender" role="img" aria-label="Donut chart showing gender split. 74.3% male (468), 25.7% female (162).">Male 468 (74.3%), Female 162 (25.7%).</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="charts-bottom">
+
+    <!-- Programming language -->
+    <div class="chart-card">
+      <div class="chart-card-title">Favorite programming language</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-sq" style="background:#00d4ff;"></div>Data Analyst</div>
+        <div class="legend-item"><div class="legend-sq" style="background:#f97316;"></div>Data Engineer</div>
+        <div class="legend-item"><div class="legend-sq" style="background:#7c3aed;"></div>Data Architect</div>
+        <div class="legend-item"><div class="legend-sq" style="background:#6b6b80;"></div>Other</div>
+      </div>
+      <div style="position:relative;width:100%;height:210px;">
+        <canvas id="c-lang" role="img" aria-label="Stacked bar chart of favorite programming languages. Python dominates with over 400 votes.">Python ~420, R ~90, Other ~70, C/C++ ~25, JavaScript ~20, Java ~15.</canvas>
+      </div>
+    </div>
+
+    <!-- Difficulty donut -->
+    <div class="chart-card">
+      <div class="chart-card-title">Difficulty to break into data</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-sq" style="background:#6b6b80;"></div>Neither 42.7%</div>
+        <div class="legend-item"><div class="legend-sq" style="background:#f97316;"></div>Difficult 24.8%</div>
+        <div class="legend-item"><div class="legend-sq" style="background:#00d4ff;"></div>Easy 21.3%</div>
+        <div class="legend-item"><div class="legend-sq" style="background:#ef4444;"></div>Very difficult 7.0%</div>
+        <div class="legend-item"><div class="legend-sq" style="background:#1f1f2e;"></div>Very easy 4.2%</div>
+      </div>
+      <div style="position:relative;width:100%;height:210px;">
+        <canvas id="c-diff" role="img" aria-label="Donut chart of difficulty breaking into data. 42.7% say neither easy nor difficult.">Neither 269 (42.7%), Difficult 156 (24.8%), Easy 134 (21.3%), Very Difficult 44 (7%), Very Easy 27 (4.2%).</canvas>
+      </div>
+    </div>
+
+    <!-- Country bar -->
+    <div class="chart-card">
+      <div class="chart-card-title">Average salary by country (k USD)</div>
+      <div style="position:relative;width:100%;height:260px;">
+        <canvas id="c-country" role="img" aria-label="Bar chart of average salary by country. United States leads at 74k USD average.">US 74k, UK 55k, Canada 53k, Other 50k, India 32k.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY FINDINGS -->
+  <div class="findings-bar">
+    <div class="findings-title">// Key findings</div>
+    <div class="findings-grid">
+      <div class="finding">
+        <div class="finding-icon">🥇</div>
+        <div class="finding-text"><strong>Data Scientists earn the most</strong> — avg ~$94k vs $55k for Data Analysts</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon">🐍</div>
+        <div class="finding-text"><strong>Python dominates</strong> — preferred by all roles, especially Data Analysts</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon">😐</div>
+        <div class="finding-text"><strong>Salary dissatisfaction is real</strong> — avg score 4.27/10 across all roles</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon">🌍</div>
+        <div class="finding-text"><strong>US leads in compensation</strong> — $74k avg vs $32k in India</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon">🚪</div>
+        <div class="finding-text"><strong>Breaking in is mixed</strong> — 42.7% say neither easy nor difficult</div>
+      </div>
+      <div class="finding">
+        <div class="finding-icon">⚖️</div>
+        <div class="finding-text"><strong>Work-life balance scores better</strong> — 5.74/10 vs 4.27 for salary</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2026 Ali Mabrouk Amin · Data Professional Survey Dashboard</div>
+  <div class="footer-links">
+    <a href="index.html">← Portfolio</a>
+    <a href="https://github.com/alimabrouk12596-data/Data-Professionals-Survey" target="_blank">GitHub Repo</a>
+    <a href="mailto:alimabrouk12596@gmail.com">Contact</a>
+  </div>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX; my=e.clientY;
+    cursor.style.left=mx-6+'px'; cursor.style.top=my-6+'px';
+  });
+  function animateRing(){
+    rx+=(mx-rx-18)*0.12; ry+=(my-ry-18)*0.12;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+  window.addEventListener('scroll',()=>{
+    document.getElementById('nav').classList.toggle('scrolled',window.scrollY>30);
+  });
+
+  // Animate satisfaction bars on load
+  setTimeout(()=>{
+    document.getElementById('wl-fill').style.width='57.4%';
+    document.getElementById('sal-fill').style.width='42.7%';
+  },400);
+
+  // Chart defaults
+  const tc='rgba(107,107,128,0.9)';
+  const gc='rgba(31,31,46,0.8)';
+  Chart.defaults.color=tc;
+  Chart.defaults.borderColor=gc;
+
+  // Salary by job title
+  new Chart(document.getElementById('c-salary'),{
+    type:'bar',
+    data:{
+      labels:['Data Scientist','Data Engineer','Data Architect','Other','Data Analyst','Database Dev','Student/Looking'],
+      datasets:[{
+        data:[94,65,64,60,55,33,27],
+        backgroundColor:['#00d4ff','#10b981','#7c3aed','#6b6b80','#f97316','#0891b2','#374151'],
+        borderRadius:2, borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'  $'+c.raw+'k average'}}},
+      scales:{
+        x:{ticks:{callback:v=>'$'+v+'k',font:{family:'Space Mono',size:10}},grid:{color:gc},border:{display:false}},
+        y:{ticks:{font:{family:'Space Mono',size:10}},grid:{display:false},border:{display:false}}
+      }
+    }
+  });
+
+  // Programming language
+  new Chart(document.getElementById('c-lang'),{
+    type:'bar',
+    data:{
+      labels:['Python','R','Other','C/C++','JavaScript','Java'],
+      datasets:[
+        {label:'Data Analyst', data:[240,30,25,5,8,4], backgroundColor:'#00d4ff'},
+        {label:'Data Engineer', data:[50,15,12,5,4,3], backgroundColor:'#f97316'},
+        {label:'Data Architect', data:[20,10,8,3,2,1], backgroundColor:'#7c3aed'},
+        {label:'Other', data:[110,35,25,12,6,7], backgroundColor:'#6b6b80'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{stacked:true,ticks:{font:{family:'Space Mono',size:10}},grid:{display:false},border:{display:false}},
+        y:{stacked:true,ticks:{font:{family:'Space Mono',size:10}},grid:{color:gc},border:{display:false}}
+      }
+    }
+  });
+
+  // Difficulty donut
+  new Chart(document.getElementById('c-diff'),{
+    type:'doughnut',
+    data:{
+      labels:['Neither easy nor difficult','Difficult','Easy','Very Difficult','Very Easy'],
+      datasets:[{
+        data:[269,156,134,44,27],
+        backgroundColor:['#6b6b80','#f97316','#00d4ff','#ef4444','#1f1f2e'],
+        borderColor:'#0a0a0f', borderWidth:3
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'62%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>c.label+': '+c.raw+' ('+((c.raw/630)*100).toFixed(1)+'%)'}}
+      }
+    }
+  });
+
+  // Country bar
+  new Chart(document.getElementById('c-country'),{
+    type:'bar',
+    data:{
+      labels:['United States','United Kingdom','Canada','Other','India'],
+      datasets:[{
+        data:[74,55,53,50,32],
+        backgroundColor:['#00d4ff','#10b981','#f97316','#6b6b80','#7c3aed'],
+        borderRadius:2, borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'  $'+c.raw+'k average'}}},
+      scales:{
+        x:{ticks:{font:{family:'Space Mono',size:10}},grid:{display:false},border:{display:false}},
+        y:{ticks:{callback:v=>'$'+v+'k',font:{family:'Space Mono',size:10}},grid:{color:gc},border:{display:false}}
+      }
+    }
+  });
+
+  // Gender donut
+  new Chart(document.getElementById('c-gender'),{
+    type:'doughnut',
+    data:{
+      labels:['Male','Female'],
+      datasets:[{
+        data:[468,162],
+        backgroundColor:['#00d4ff','#10b981'],
+        borderColor:'#0a0a0f', borderWidth:3
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'60%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>c.label+': '+c.raw+' ('+((c.raw/630)*100).toFixed(1)+'%)'}}
+      }
+    }
+  });
+</script>
+</body>
+</html>

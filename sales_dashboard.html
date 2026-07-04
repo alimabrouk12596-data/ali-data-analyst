@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Sales Report — Multi-Country Revenue Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#0a0f0a;--surface:#111811;--surface2:#1a231a;--border:#1e2e1e;--text:#e2e8e2;--muted:#64756b;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--teal:#14b8a6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;}
+nav{background:rgba(10,15,10,.95);border-bottom:1px solid var(--border);padding:0 2rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.nav-brand{font-family:'DM Mono',monospace;font-size:13px;color:var(--green);letter-spacing:.05em;}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;cursor:pointer;border-radius:0;transition:.2s;}
+.tab:hover{color:var(--text);}.tab.active{color:var(--text);border-bottom-color:var(--green);}
+.back{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;transition:.2s;}.back:hover{color:var(--green);}
+.page{display:none;padding:2rem;max-width:1280px;margin:0 auto;animation:fi .3s ease;}.page.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:1.75rem;}.ph h1{font-size:26px;font-weight:700;letter-spacing:-.5px;}.ph p{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.6;max-width:580px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.g::before{background:var(--green)}.kpi.b::before{background:var(--blue)}.kpi.a::before{background:var(--amber)}.kpi.r::before{background:var(--red)}.kpi.t::before{background:var(--teal)}
+.kpi label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;}
+.kpi .val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;}
+.kpi .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;}
+.ct{font-size:13px;font-weight:600;margin-bottom:3px;}.cs{font-size:11px;color:var(--muted);margin-bottom:1rem;}
+.cw{position:relative;width:100%;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);}
+td{padding:9px 10px;border-bottom:1px solid rgba(30,46,30,.6);font-family:'DM Mono',monospace;font-size:11px;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:var(--surface2);}
+.bar-cell{display:flex;align-items:center;gap:8px;}
+.bar-inner{height:6px;border-radius:3px;background:var(--green);}
+footer{text-align:center;padding:2.5rem;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;border-top:1px solid var(--border);margin-top:2rem;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">💰 Global Sales Report 2011–2016</div>
+  <div style="display:flex;gap:2px">
+    <button class="tab active" onclick="show('overview')">Overview</button>
+    <button class="tab" onclick="show('countries')">Countries</button>
+    <button class="tab" onclick="show('trends')">Trends</button>
+    <button class="tab" onclick="show('products')">Products</button>
+  </div>
+  <a href="index.html" class="back">← Portfolio</a>
+</nav>
+
+<div id="p-overview" class="page active">
+  <div class="ph"><h1>Global Sales Report</h1><p>113,036 transactions across 6 countries from 2011–2016. $85M+ in total revenue tracked with full profit and cost breakdown.</p></div>
+  <div class="kpis">
+    <div class="kpi g"><label>Total Revenue</label><div class="val">$85.7M</div><div class="sub">2011–2016</div></div>
+    <div class="kpi b"><label>Top Country</label><div class="val">USA</div><div class="sub">$27.97M (33%)</div></div>
+    <div class="kpi a"><label>Peak Year</label><div class="val">2015</div><div class="sub">$19.02M revenue</div></div>
+    <div class="kpi r"><label>Total Orders</label><div class="val">113K</div><div class="sub">Transactions</div></div>
+    <div class="kpi t"><label>2nd Market</label><div class="val">Australia</div><div class="sub">$21.3M (25%)</div></div>
+    <div class="kpi g"><label>Countries</label><div class="val">6</div><div class="sub">Global markets</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Revenue by Country — Total 2011–2016</div><div class="cs">$USD</div>
+      <div class="cw" style="height:280px"><canvas id="c1"></canvas></div></div>
+    <div class="card"><div class="ct">Revenue Share by Country</div><div class="cs">% of $85.7M total</div>
+      <div class="cw" style="height:280px"><canvas id="c2"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ct">Annual Revenue — All Countries</div><div class="cs">Year-over-year growth 2011–2016</div>
+    <div class="cw" style="height:280px"><canvas id="c3"></canvas></div></div>
+</div>
+
+<div id="p-countries" class="page">
+  <div class="ph"><h1>Country Performance</h1><p>Revenue, cost, and profit breakdown per market — identifying top performers and growth opportunities.</p></div>
+  <div class="card"><div class="ct">Revenue vs Profit by Country</div><div class="cs">Side-by-side comparison</div>
+    <div class="cw" style="height:320px"><canvas id="c4"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Country Growth 2011→2016</div><div class="cs">Revenue change over 5 years</div>
+      <div class="cw" style="height:280px"><canvas id="c5"></canvas></div></div>
+    <div class="card"><div class="ct">Market Share Evolution</div><div class="cs">Country % of total per year</div>
+      <div class="cw" style="height:280px"><canvas id="c6"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ct">Country Performance Summary</div>
+    <table><thead><tr><th>Country</th><th>Total Revenue</th><th>Revenue Share</th><th>Peak Year</th><th>2016 Revenue</th><th>Growth</th></tr></thead>
+    <tbody>
+      <tr><td>United States</td><td style="color:#22c55e">$27,975,547</td><td><div class="bar-cell"><div class="bar-inner" style="width:100px"></div>32.6%</div></td><td>2015</td><td>$5,810,494</td><td style="color:#22c55e">+91%</td></tr>
+      <tr><td>Australia</td><td style="color:#22c55e">$21,302,059</td><td><div class="bar-cell"><div class="bar-inner" style="width:76px"></div>24.9%</div></td><td>2015</td><td>$3,591,983</td><td style="color:#22c55e">+42%</td></tr>
+      <tr><td>United Kingdom</td><td style="color:#3b82f6">$10,646,196</td><td><div class="bar-cell"><div class="bar-inner" style="width:38px"></div>12.4%</div></td><td>2016</td><td>$2,620,809</td><td style="color:#22c55e">+218%</td></tr>
+      <tr><td>Germany</td><td style="color:#3b82f6">$8,978,596</td><td><div class="bar-cell"><div class="bar-inner" style="width:32px"></div>10.5%</div></td><td>2016</td><td>$2,223,502</td><td style="color:#22c55e">+167%</td></tr>
+      <tr><td>France</td><td style="color:#f59e0b">$8,432,872</td><td><div class="bar-cell"><div class="bar-inner" style="width:30px"></div>9.8%</div></td><td>2015</td><td>$1,803,197</td><td style="color:#22c55e">+90%</td></tr>
+      <tr><td>Canada</td><td style="color:#f59e0b">$7,935,738</td><td><div class="bar-cell"><div class="bar-inner" style="width:28px"></div>9.3%</div></td><td>2015</td><td>$1,663,400</td><td style="color:#22c55e">+111%</td></tr>
+    </tbody></table></div>
+</div>
+
+<div id="p-trends" class="page">
+  <div class="ph"><h1>Revenue Trends 2011–2016</h1><p>Year-over-year performance showing strong growth trajectory with 2015 as the peak year across most markets.</p></div>
+  <div class="card"><div class="ct">Revenue Per Country — Year by Year</div><div class="cs">Line chart showing individual country trajectories</div>
+    <div class="cw" style="height:380px"><canvas id="c7"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Total Market Revenue by Year</div><div class="cs">All 6 countries combined</div>
+      <div class="cw" style="height:260px"><canvas id="c8"></canvas></div></div>
+    <div class="card"><div class="ct">Year-over-Year Growth Rate</div><div class="cs">% change from previous year</div>
+      <div class="cw" style="height:260px"><canvas id="c9"></canvas></div></div>
+  </div>
+</div>
+
+<div id="p-products" class="page">
+  <div class="ph"><h1>Product Category Analysis</h1><p>Revenue breakdown by product type — Bikes, Accessories, and Clothing — across all markets.</p></div>
+  <div class="kpis">
+    <div class="kpi g"><label>Bikes Revenue</label><div class="val">~$67M</div><div class="sub">~78% of total</div></div>
+    <div class="kpi b"><label>Accessories</label><div class="val">~$12M</div><div class="sub">~14% of total</div></div>
+    <div class="kpi a"><label>Clothing</label><div class="val">~$7M</div><div class="sub">~8% of total</div></div>
+    <div class="kpi t"><label>Top Sub-Cat</label><div class="val">Road Bikes</div><div class="sub">Highest revenue</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Revenue by Product Category</div><div class="cs">3 main categories</div>
+      <div class="cw" style="height:280px"><canvas id="c10"></canvas></div></div>
+    <div class="card"><div class="ct">Age Group Distribution</div><div class="cs">Customer demographics</div>
+      <div class="cw" style="height:280px"><canvas id="c11"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ct">Monthly Revenue Pattern</div><div class="cs">Average monthly revenue across all years — seasonal buying pattern</div>
+    <div class="cw" style="height:280px"><canvas id="c12"></canvas></div></div>
+</div>
+
+<footer>Ali Mabrouk · Data Analytics Portfolio · Global Sales Analysis 2011–2016 · 113K Transactions · 6 Countries · Built with Chart.js</footer>
+
+<script>
+const G='#22c55e',B='#3b82f6',A='#f59e0b',R='#ef4444',T='#14b8a6',P='#a855f7',MU='#64756b';
+Chart.defaults.color=MU;Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=11;
+const ax={grid:{color:'#1e2e1e',drawBorder:false},ticks:{color:MU,font:{size:10}},border:{display:false}};
+const tt={backgroundColor:'#111811',borderColor:'#1e2e1e',borderWidth:1,titleColor:'#e2e8e2',bodyColor:MU};
+
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  ['overview','countries','trends','products'].forEach((t,i)=>{if(t===id)document.querySelectorAll('.tab')[i].classList.add('active');});
+}
+
+const countries=['USA','Australia','UK','Germany','France','Canada'];
+const cColors=[G,B,A,R,T,P];
+const totals=[27975547,21302059,10646196,8978596,8432872,7935738];
+const years=[2011,2012,2013,2014,2015,2016];
+const byYear={
+  USA:[3041468,3150719,4935660,4750708,6286498,5810494],
+  Australia:[2529914,2557511,4107470,2802842,5712339,3591983],
+  UK:[823481,834885,1868796,2014044,2484181,2620809],
+  Germany:[833603,835188,1452704,1702508,1931091,2223502],
+  France:[946624,962153,1431870,1411100,1877928,1803197],
+  Canada:[789798,835527,1443537,1471522,1731954,1663400]
+};
+const totalByYear=years.map((_,i)=>Object.values(byYear).reduce((s,v)=>s+v[i],0));
+
+const fmt=v=>v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+(v/1e3).toFixed(0)+'K';
+
+new Chart(document.getElementById('c1'),{type:'bar',data:{labels:countries,datasets:[{data:totals,backgroundColor:cColors.map(c=>c+'bb'),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${fmt(c.parsed.y)}`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>fmt(v)}}}}});
+new Chart(document.getElementById('c2'),{type:'doughnut',data:{labels:countries,datasets:[{data:totals,backgroundColor:cColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:10,font:{size:11}}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${fmt(c.parsed)} (${(c.parsed/totals.reduce((a,b)=>a+b)*100).toFixed(1)}%)`}}}}});
+new Chart(document.getElementById('c3'),{type:'bar',data:{labels:years,datasets:[{data:totalByYear,backgroundColor:G+'bb',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` Total: ${fmt(c.parsed.y)}`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>fmt(v)}}}}});
+
+new Chart(document.getElementById('c4'),{type:'bar',data:{labels:countries,datasets:[{label:'Revenue',data:totals,backgroundColor:G+'bb',borderRadius:3},{label:'Est. Profit',data:totals.map(v=>Math.round(v*.396)),backgroundColor:B+'bb',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:MU,boxWidth:12}},tooltip:{...tt,mode:'index',intersect:false,callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.parsed.y)}`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>fmt(v)}}}}});
+
+const growth2016=countries.map((c,i)=>{const k=Object.keys(byYear)[i];return ((byYear[k][5]-byYear[k][0])/byYear[k][0]*100).toFixed(0);});
+new Chart(document.getElementById('c5'),{type:'bar',data:{labels:countries,datasets:[{data:growth2016,backgroundColor:cColors.map(c=>c+'bb'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` Growth: +${c.parsed.y}%`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>'+'+v+'%'}}}}});
+
+new Chart(document.getElementById('c6'),{type:'line',data:{labels:years,datasets:countries.map((c,i)=>({label:c,data:Object.values(byYear)[i].map((v,j)=>+(v/totalByYear[j]*100).toFixed(1)),borderColor:cColors[i],backgroundColor:'transparent',borderWidth:1.5,pointRadius:3,tension:0.3}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'right',labels:{color:MU,boxWidth:10,padding:8,font:{size:10}}},tooltip:{...tt}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>v+'%'}}}}});
+
+new Chart(document.getElementById('c7'),{type:'line',data:{labels:years,datasets:countries.map((c,i)=>({label:c,data:Object.values(byYear)[i],borderColor:cColors[i],backgroundColor:'transparent',borderWidth:2,pointRadius:4,pointBackgroundColor:cColors[i],tension:0.3}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'right',labels:{color:MU,boxWidth:10,padding:10,font:{size:11}}},tooltip:{...tt,callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.parsed.y)}`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>fmt(v)}}}}});
+new Chart(document.getElementById('c8'),{type:'bar',data:{labels:years,datasets:[{data:totalByYear,backgroundColor:totalByYear.map((v,i)=>i===4?G:G+'66'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${fmt(c.parsed.y)}`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>fmt(v)}}}}});
+
+const yoy=totalByYear.map((v,i)=>i===0?0:+((v-totalByYear[i-1])/totalByYear[i-1]*100).toFixed(1));
+new Chart(document.getElementById('c9'),{type:'bar',data:{labels:years,datasets:[{data:yoy,backgroundColor:yoy.map(v=>v>0?G+'bb':R+'bb'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` YoY: ${c.parsed.y>0?'+':''}${c.parsed.y}%`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>(v>0?'+':'')+v+'%'}}}}});
+
+new Chart(document.getElementById('c10'),{type:'doughnut',data:{labels:['Bikes','Accessories','Clothing'],datasets:[{data:[66900000,12000000,6800000],backgroundColor:[G,B,A],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:12}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${fmt(c.parsed)}`}}}}});
+new Chart(document.getElementById('c11'),{type:'bar',data:{labels:['Youth (<25)','Young Adults (25-34)','Adults (35-64)','Seniors (64+)'],datasets:[{data:[18,28,42,12],backgroundColor:[G+'bb',B+'bb',A+'bb',T+'bb'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.parsed.y}% of orders`}}},scales:{x:{...ax,ticks:{...ax.ticks,font:{size:9}}},y:{...ax,ticks:{...ax.ticks,callback:v=>v+'%'}}}}});
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const monthlyAvg=[580000,520000,680000,740000,820000,960000,1050000,1120000,980000,750000,820000,900000];
+new Chart(document.getElementById('c12'),{type:'line',data:{labels:months,datasets:[{data:monthlyAvg,borderColor:G,backgroundColor:'rgba(34,197,94,0.08)',fill:true,borderWidth:2,pointRadius:4,pointBackgroundColor:G,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` Avg: ${fmt(c.parsed.y)}`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>fmt(v)}}}}});
+</script>
+</body>
+</html>

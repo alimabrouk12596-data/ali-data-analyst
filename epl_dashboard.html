@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPL 2024/25 — Player Statistics Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#0a0e1a;--surface:#111827;--surface2:#1a2235;--border:#1f2d45;--text:#e2e8f0;--muted:#64748b;--green:#00d4aa;--blue:#3b82f6;--red:#ef4444;--amber:#f59e0b;--purple:#a855f7;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;}
+nav{background:rgba(10,14,26,0.95);border-bottom:1px solid var(--border);padding:0 2rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.nav-brand{font-family:'DM Mono',monospace;font-size:13px;color:var(--green);letter-spacing:.05em;}
+.nav-tabs{display:flex;gap:2px;}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;cursor:pointer;border-radius:0;transition:.2s;letter-spacing:.3px;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--text);border-bottom-color:var(--green);}
+.back{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;transition:.2s;}
+.back:hover{color:var(--green);}
+.page{display:none;padding:2rem;max-width:1280px;margin:0 auto;animation:fi .3s ease;}
+.page.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:1.75rem;}
+.ph h1{font-size:26px;font-weight:700;letter-spacing:-.5px;}
+.ph p{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.6;max-width:580px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.g::before{background:var(--green)}.kpi.b::before{background:var(--blue)}.kpi.r::before{background:var(--red)}.kpi.a::before{background:var(--amber)}.kpi.p::before{background:var(--purple)}
+.kpi label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;}
+.kpi .val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;}
+.kpi .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;}
+.ct{font-size:13px;font-weight:600;margin-bottom:3px;}
+.cs{font-size:11px;color:var(--muted);margin-bottom:1rem;}
+.cw{position:relative;width:100%;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.ld{width:10px;height:10px;border-radius:2px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);}
+td{padding:9px 10px;border-bottom:1px solid rgba(31,45,69,.5);font-family:'DM Mono',monospace;font-size:11px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif;}
+.pos-FWD{background:rgba(239,68,68,.15);color:#ef4444;}
+.pos-MID{background:rgba(59,130,246,.15);color:#3b82f6;}
+.pos-DEF{background:rgba(0,212,170,.15);color:#00d4aa;}
+.pos-GKP{background:rgba(245,158,11,.15);color:#f59e0b;}
+footer{text-align:center;padding:2.5rem;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;border-top:1px solid var(--border);margin-top:2rem;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">⚽ EPL 2024/25 — Player Analysis</div>
+  <div class="nav-tabs">
+    <button class="tab active" onclick="show('overview')">Overview</button>
+    <button class="tab" onclick="show('scorers')">Top Scorers</button>
+    <button class="tab" onclick="show('clubs')">Clubs</button>
+    <button class="tab" onclick="show('positions')">Positions</button>
+  </div>
+  <a href="index.html" class="back">← Portfolio</a>
+</nav>
+
+<div id="p-overview" class="page active">
+  <div class="ph"><h1>Premier League 2024/25</h1><p>Full analysis of 562 players across 20 clubs and 64 nationalities — covering goals, assists, discipline, and club performance.</p></div>
+  <div class="kpis">
+    <div class="kpi g"><label>Total Players</label><div class="val">562</div><div class="sub">20 clubs</div></div>
+    <div class="kpi r"><label>Top Scorer</label><div class="val">Salah</div><div class="sub">29 goals</div></div>
+    <div class="kpi b"><label>Top Club</label><div class="val">Liverpool</div><div class="sub">72 goals</div></div>
+    <div class="kpi a"><label>Nationalities</label><div class="val">64</div><div class="sub">Global talent</div></div>
+    <div class="kpi p"><label>Assists Leader</label><div class="val">Salah</div><div class="sub">18 assists</div></div>
+    <div class="kpi g"><label>FWD Goals%</label><div class="val">32%</div><div class="sub">307 of 963</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Goals by Position</div><div class="cs">Total goals across all positions</div>
+      <div class="leg"><div class="li"><span class="ld" style="background:#ef4444"></span>FWD</div><div class="li"><span class="ld" style="background:#3b82f6"></span>MID</div><div class="li"><span class="ld" style="background:#00d4aa"></span>DEF</div><div class="li"><span class="ld" style="background:#f59e0b"></span>GKP</div></div>
+      <div class="cw" style="height:240px"><canvas id="c1"></canvas></div></div>
+    <div class="card"><div class="ct">Assists by Position</div><div class="cs">Creative contribution per role</div>
+      <div class="cw" style="height:240px"><canvas id="c2"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ct">Top 10 Clubs — Total Goals</div><div class="cs">Combined goals by all players per club</div>
+    <div class="cw" style="height:300px"><canvas id="c3"></canvas></div></div>
+</div>
+
+<div id="p-scorers" class="page">
+  <div class="ph"><h1>Top Scorers & Assisters</h1><p>Individual player performance — ranked by goals and total contributions (Goals + Assists).</p></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Top 10 Goalscorers</div><div class="cs">Goals scored in 2024/25 season</div>
+      <div class="cw" style="height:320px"><canvas id="c4"></canvas></div></div>
+    <div class="card"><div class="ct">Top 10 Assisters</div><div class="cs">Most creative players by assist count</div>
+      <div class="cw" style="height:320px"><canvas id="c5"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ct">Top 15 Players — Total Contributions (G+A)</div><div class="cs">Goals + Assists combined</div>
+    <div class="cw" style="height:320px"><canvas id="c6"></canvas></div></div>
+  <div class="card" style="margin-top:0"><div class="ct">Top Scorers — Full Table</div><div class="cs">Top 15 players by goals</div>
+    <table><thead><tr><th>#</th><th>Player</th><th>Club</th><th>Pos</th><th>Goals</th><th>Assists</th><th>G+A</th><th>Apps</th></tr></thead>
+    <tbody id="scorerTable"></tbody></table></div>
+</div>
+
+<div id="p-clubs" class="page">
+  <div class="ph"><h1>Club Analysis</h1><p>Team-level breakdown of goals, assists, and attacking output across all 20 Premier League clubs.</p></div>
+  <div class="card"><div class="ct">Goals per Club — All 20 Teams</div><div class="cs">Total goals by club players in 2024/25</div>
+    <div class="cw" style="height:420px"><canvas id="c7"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Top 5 Clubs — Goals vs Assists</div><div class="cs">Attacking output comparison</div>
+      <div class="cw" style="height:280px"><canvas id="c8"></canvas></div></div>
+    <div class="card"><div class="ct">Club Goals Share</div><div class="cs">% of total league goals</div>
+      <div class="cw" style="height:280px"><canvas id="c9"></canvas></div></div>
+  </div>
+</div>
+
+<div id="p-positions" class="page">
+  <div class="ph"><h1>Position Analysis</h1><p>How different positions contribute — goals, assists, and discipline breakdown by role.</p></div>
+  <div class="kpis">
+    <div class="kpi r"><label>FWD Goals</label><div class="val">307</div><div class="sub">32% of total</div></div>
+    <div class="kpi b"><label>MID Goals</label><div class="val">522</div><div class="sub">54% of total</div></div>
+    <div class="kpi g"><label>DEF Goals</label><div class="val">132</div><div class="sub">14% of total</div></div>
+    <div class="kpi a"><label>MID Assists</label><div class="val">438</div><div class="sub">Top creative role</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Goals Distribution by Position</div><div class="cs">Who scores the most?</div>
+      <div class="cw" style="height:280px"><canvas id="c10"></canvas></div></div>
+    <div class="card"><div class="ct">Assists Distribution by Position</div><div class="cs">Who creates the most?</div>
+      <div class="cw" style="height:280px"><canvas id="c11"></canvas></div></div>
+  </div>
+  <div class="card"><div class="ct">Goals vs Assists — By Position</div><div class="cs">Grouped comparison</div>
+    <div class="cw" style="height:300px"><canvas id="c12"></canvas></div></div>
+</div>
+
+<footer>Ali Mabrouk · Data Analytics Portfolio · EPL 2024/25 Player Analysis · 562 Players · 57 Statistical Columns · Built with Chart.js</footer>
+
+<script>
+const G='#00d4aa',B='#3b82f6',R='#ef4444',A='#f59e0b',P='#a855f7',MU='#64748b';
+Chart.defaults.color=MU; Chart.defaults.font.family="'DM Sans',sans-serif"; Chart.defaults.font.size=11;
+const ax={grid:{color:'#1f2d45',drawBorder:false},ticks:{color:MU,font:{size:10}},border:{display:false}};
+const tt={backgroundColor:'#111827',borderColor:'#1f2d45',borderWidth:1,titleColor:'#e2e8f0',bodyColor:MU};
+const df=(extra={})=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt},...extra.plugins},scales:{...extra.scales},...extra});
+
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  ['overview','scorers','clubs','positions'].forEach((t,i)=>{if(t===id)document.querySelectorAll('.tab')[i].classList.add('active');});
+}
+
+// DATA
+const positions=['FWD','MID','DEF','GKP'];
+const posGoals=[307,522,132,2];
+const posAssists=[70,438,133,3];
+const posColors=[R,B,G,A];
+
+const clubs=['Liverpool','Man City','Arsenal','Newcastle','Brighton','Chelsea','Aston Villa','Nott\'m Forest','Brentford','Crystal Palace','Fulham','Man United','Tottenham','West Ham','Wolves','Everton','Bournemouth','Leicester','Ipswich','Southampton'];
+const clubGoals=[72,71,67,66,63,63,61,57,54,51,50,46,45,43,40,35,34,32,28,25];
+const clubAssists=[65,68,62,58,60,55,57,52,48,45,43,40,38,36,32,30,28,25,22,18];
+
+const scorers=[
+  {name:'Mohamed Salah',club:'Liverpool',pos:'MID',g:29,a:18},
+  {name:'Alexander Isak',club:'Newcastle',pos:'FWD',g:23,a:0},
+  {name:'Erling Haaland',club:'Man City',pos:'FWD',g:22,a:3},
+  {name:'Bryan Mbeumo',club:'Brentford',pos:'MID',g:20,a:7},
+  {name:'Chris Wood',club:'Nott\'m Forest',pos:'FWD',g:20,a:3},
+  {name:'Yoane Wissa',club:'Brentford',pos:'FWD',g:19,a:0},
+  {name:'Ollie Watkins',club:'Aston Villa',pos:'FWD',g:16,a:8},
+  {name:'Cole Palmer',club:'Chelsea',pos:'MID',g:15,a:8},
+  {name:'Matheus Cunha',club:'Wolves',pos:'MID',g:15,a:6},
+  {name:'J-P Mateta',club:'Crystal Palace',pos:'FWD',g:14,a:2},
+  {name:'Bukayo Saka',club:'Arsenal',pos:'MID',g:6,a:10},
+  {name:'Kevin De Bruyne',club:'Man City',pos:'MID',g:5,a:12},
+  {name:'Trent Alexander-Arnold',club:'Liverpool',pos:'DEF',g:4,a:13},
+  {name:'Diogo Jota',club:'Liverpool',pos:'FWD',g:14,a:3},
+  {name:'Dominic Solanke',club:'Tottenham',pos:'FWD',g:13,a:4},
+];
+
+// Charts
+new Chart(document.getElementById('c1'),{type:'doughnut',data:{labels:positions,datasets:[{data:posGoals,backgroundColor:posColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:10,font:{size:11}}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed} goals (${(c.parsed/963*100).toFixed(1)}%)`}}}}});
+new Chart(document.getElementById('c2'),{type:'doughnut',data:{labels:positions,datasets:[{data:posAssists,backgroundColor:posColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:10,font:{size:11}}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed} assists`}}}}});
+new Chart(document.getElementById('c3'),{type:'bar',data:{labels:clubs.slice(0,10),datasets:[{data:clubGoals.slice(0,10),backgroundColor:clubGoals.slice(0,10).map((v,i)=>i===0?G:i===1?B:B+'99'),borderRadius:4}]},options:df({scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>v+' goals'}}}})});
+new Chart(document.getElementById('c4'),{type:'bar',data:{labels:scorers.slice(0,10).map(s=>s.name.split(' ').pop()),datasets:[{data:scorers.slice(0,10).map(s=>s.g),backgroundColor:scorers.slice(0,10).map((s,i)=>i===0?R:R+'88'),borderRadius:4}]},options:{...df({scales:{x:{...ax,ticks:{...ax.ticks,maxRotation:35}},y:{...ax}}}),plugins:{legend:{display:false},tooltip:{...tt,callbacks:{title:i=>[scorers[i[0].dataIndex].name,scorers[i[0].dataIndex].club].join(' — '),label:c=>` Goals: ${c.parsed.y}`}}}}});
+
+const topAssisters=[...scorers].sort((a,b)=>b.a-a.a).slice(0,10);
+new Chart(document.getElementById('c5'),{type:'bar',data:{labels:topAssisters.map(s=>s.name.split(' ').pop()),datasets:[{data:topAssisters.map(s=>s.a),backgroundColor:B+'bb',borderRadius:4}]},options:{...df({scales:{x:{...ax,ticks:{...ax.ticks,maxRotation:35}},y:{...ax}}}),plugins:{legend:{display:false},tooltip:{...tt,callbacks:{title:i=>[topAssisters[i[0].dataIndex].name].join(''),label:c=>` Assists: ${c.parsed.y}`}}}}});
+
+const byGA=[...scorers].sort((a,b)=>(b.g+b.a)-(a.g+a.a)).slice(0,15);
+new Chart(document.getElementById('c6'),{type:'bar',data:{labels:byGA.map(s=>s.name.split(' ').pop()),datasets:[{label:'Goals',data:byGA.map(s=>s.g),backgroundColor:R+'bb',borderRadius:2},{label:'Assists',data:byGA.map(s=>s.a),backgroundColor:B+'bb',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:MU,boxWidth:12}},tooltip:{...tt,mode:'index',intersect:false}},scales:{x:{...ax,stacked:true,ticks:{...ax.ticks,maxRotation:40}},y:{...ax,stacked:true}}}});
+
+new Chart(document.getElementById('c7'),{type:'bar',data:{labels:clubs,datasets:[{data:clubGoals,backgroundColor:clubGoals.map((v,i)=>v>=65?G:v>=50?B:MU+'66'),borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` ${c.parsed.x} goals`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,font:{size:10}}}}}});
+
+const top5=['Liverpool','Man City','Arsenal','Newcastle','Brighton'];
+const t5g=[72,71,67,66,63],t5a=[65,68,62,58,60];
+new Chart(document.getElementById('c8'),{type:'bar',data:{labels:top5,datasets:[{label:'Goals',data:t5g,backgroundColor:R+'bb',borderRadius:2},{label:'Assists',data:t5a,backgroundColor:B+'bb',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:MU,boxWidth:12}},tooltip:{...tt,mode:'index',intersect:false}},scales:{x:{...ax},y:{...ax}}}});
+new Chart(document.getElementById('c9'),{type:'doughnut',data:{labels:clubs.slice(0,8),datasets:[{data:clubGoals.slice(0,8),backgroundColor:[G,B,R,A,P,'#06b6d4','#84cc16','#f97316'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:10,padding:8,font:{size:10}}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed} (${(c.parsed/963*100).toFixed(1)}%)`}}}}});
+
+new Chart(document.getElementById('c10'),{type:'doughnut',data:{labels:positions,datasets:[{data:posGoals,backgroundColor:posColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:12}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed} goals (${(c.parsed/963*100).toFixed(1)}%)`}}}}});
+new Chart(document.getElementById('c11'),{type:'doughnut',data:{labels:positions,datasets:[{data:posAssists,backgroundColor:posColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:12}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed} assists`}}}}});
+new Chart(document.getElementById('c12'),{type:'bar',data:{labels:positions,datasets:[{label:'Goals',data:posGoals,backgroundColor:posColors.map(c=>c+'bb'),borderRadius:4},{label:'Assists',data:posAssists,backgroundColor:posColors.map(c=>c+'55'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:MU,boxWidth:12}},tooltip:{...tt,mode:'index',intersect:false}},scales:{x:{...ax},y:{...ax}}}});
+
+// Scorer table
+document.getElementById('scorerTable').innerHTML=scorers.map((s,i)=>`<tr><td style="color:${MU}">${i+1}</td><td style="font-family:'DM Sans'">${s.name}</td><td style="font-family:'DM Sans';color:${MU}">${s.club}</td><td><span class="badge pos-${s.pos}">${s.pos}</span></td><td style="color:${R};font-weight:600">${s.g}</td><td style="color:${B}">${s.a}</td><td style="color:${G};font-weight:600">${s.g+s.a}</td><td style="color:${MU}">—</td></tr>`).join('');
+</script>
+</body>
+</html>

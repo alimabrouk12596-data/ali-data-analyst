@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airbnb Seattle — Market Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:       #0e0f13;
+  --surface:  #16181f;
+  --surface2: #1e2029;
+  --border:   #2a2d38;
+  --text:     #e8e9ed;
+  --muted:    #6b7080;
+  --accent:   #e84c4c;
+  --accent2:  #f5a623;
+  --accent3:  #3ecf8e;
+  --accent4:  #5b8dee;
+  --accent5:  #c879e8;
+  --font-display: 'DM Serif Display', serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(14,15,19,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  height: 56px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-size: 18px; letter-spacing: -0.3px;
+}
+.nav-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.nav-tabs { display: flex; gap: 2px; }
+.nav-tab {
+  background: none; border: none; color: var(--muted);
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer;
+  transition: all .2s; white-space: nowrap;
+  letter-spacing: 0.3px; text-transform: uppercase;
+}
+.nav-tab:hover { color: var(--text); background: var(--surface2); }
+.nav-tab.active { color: var(--text); background: var(--surface2); border-bottom: 2px solid var(--accent); border-radius: 6px 6px 0 0; }
+.nav-meta { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+
+/* PAGES */
+.page { display: none; padding: 2rem; max-width: 1300px; margin: 0 auto; animation: fadeIn .3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 2rem; }
+.page-header h1 { font-family: var(--font-display); font-size: 28px; letter-spacing: -0.5px; line-height: 1.2; }
+.page-header p { color: var(--muted); margin-top: 6px; font-size: 13px; line-height: 1.6; max-width: 600px; }
+
+/* CHART CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.card-header { margin-bottom: 1.25rem; }
+.card-title { font-size: 13px; font-weight: 600; letter-spacing: 0.2px; }
+.card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.chart-wrap { position: relative; width: 100%; }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.2rem 1.4rem;
+  position: relative; overflow: hidden;
+}
+.kpi::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.kpi.red::before  { background: var(--accent); }
+.kpi.amber::before { background: var(--accent2); }
+.kpi.green::before { background: var(--accent3); }
+.kpi.blue::before  { background: var(--accent4); }
+.kpi.purple::before{ background: var(--accent5); }
+.kpi label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 8px; }
+.kpi .val  { font-family: var(--font-mono); font-size: 22px; font-weight: 500; letter-spacing: -0.5px; }
+.kpi .sub  { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--muted); font-weight: 600;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+.data-table td { padding: 11px 14px; border-bottom: 1px solid rgba(42,45,56,0.6); font-family: var(--font-mono); font-size: 12px; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--surface2); }
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; font-family: var(--font-body);
+}
+
+/* MAP PLACEHOLDER */
+.map-container {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; position: relative;
+}
+.zip-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+.zip-badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 11px;
+  font-family: var(--font-mono); font-weight: 500;
+  border: 1px solid var(--border);
+}
+
+/* DASHBOARD GRID */
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.dash-grid .span2 { grid-column: span 2; }
+.dash-mini .chart-wrap canvas { }
+
+/* TOOLTIP overrides */
+.chartjs-tooltip { font-family: var(--font-mono) !important; }
+
+/* Legend row */
+.leg { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+/* Footer */
+footer {
+  text-align: center; padding: 3rem; color: var(--muted);
+  font-size: 12px; font-family: var(--font-mono);
+  border-top: 1px solid var(--border); margin-top: 3rem;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand"><span class="dot"></span> Airbnb Seattle</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('price-zip')">Price by Zip</button>
+    <button class="nav-tab" onclick="showPage('map-zip')">Map by Zip</button>
+    <button class="nav-tab" onclick="showPage('revenue-year')">Revenue for Year</button>
+    <button class="nav-tab" onclick="showPage('avg-bedroom')">Avg Price/Bedroom</button>
+    <button class="nav-tab" onclick="showPage('bedroom-count')">Bedroom Listings</button>
+    <button class="nav-tab" onclick="showPage('dashboard')">Dashboard</button>
+  </div>
+  <div class="nav-meta">Seattle · 2016 · 3,818 listings</div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 1 — Price By Zip Code
+══════════════════════════════════════════════ -->
+<div id="page-price-zip" class="page active">
+  <div class="page-header">
+    <h1>Price By Zip Code</h1>
+    <p>Average nightly listing price across all Seattle ZIP codes. Sorted highest to lowest — industrial and waterfront zones command the highest rates.</p>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Average Nightly Price — All ZIP Codes</div>
+      <div class="card-sub">Based on 3,818 active listings · USD per night</div>
+    </div>
+    <div class="leg">
+      <div class="leg-item"><span class="leg-dot" style="background:#e84c4c"></span>Above $150</div>
+      <div class="leg-item"><span class="leg-dot" style="background:#f5a623"></span>$100–$150</div>
+      <div class="leg-item"><span class="leg-dot" style="background:#3ecf8e"></span>Below $100</div>
+    </div>
+    <div class="chart-wrap" style="height:480px">
+      <canvas id="chartPriceZip"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 — Price Per Zip Code (Map)
+══════════════════════════════════════════════ -->
+<div id="page-map-zip" class="page">
+  <div class="page-header">
+    <h1>Price Per Zip Code</h1>
+    <p>Geographic breakdown of average nightly prices. Each ZIP code is colour-coded by price tier — darker red indicates higher average nightly rate.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Seattle ZIP Code Heat Map — Avg Nightly Price</div>
+      <div class="card-sub">Bubble size = number of listings · Colour = avg price tier</div>
+    </div>
+
+    <!-- SVG map approximation using scatter bubbles -->
+    <div class="chart-wrap" style="height:520px">
+      <canvas id="chartMapZip"></canvas>
+    </div>
+
+    <div class="zip-legend" style="margin-top:1.25rem">
+      <div style="font-size:11px; color:var(--muted); width:100%; margin-bottom:6px; text-transform:uppercase; letter-spacing:.8px; font-weight:600;">Price tier legend</div>
+      <span class="zip-badge" style="background:rgba(232,76,76,0.15);color:#e84c4c;border-color:#e84c4c40">$150+ / night</span>
+      <span class="zip-badge" style="background:rgba(245,166,35,0.15);color:#f5a623;border-color:#f5a62340">$120–$150 / night</span>
+      <span class="zip-badge" style="background:rgba(91,141,238,0.15);color:#5b8dee;border-color:#5b8dee40">$100–$120 / night</span>
+      <span class="zip-badge" style="background:rgba(62,207,142,0.15);color:#3ecf8e;border-color:#3ecf8e40">Below $100 / night</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 3 — Revenue For Year
+══════════════════════════════════════════════ -->
+<div id="page-revenue-year" class="page">
+  <div class="page-header">
+    <h1>Revenue For Year</h1>
+    <p>Weekly average nightly price trends across the top 6 ZIP codes — Jan 2016 to Jan 2017. Shows seasonal pricing cycles by neighbourhood.</p>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Weekly Avg Price by ZIP Code — Full Year</div>
+      <div class="card-sub">Top 6 ZIP codes by avg price · Calendar dataset · 52 weeks</div>
+    </div>
+    <div class="leg" id="weeklyLeg"></div>
+    <div class="chart-wrap" style="height:420px">
+      <canvas id="chartRevYear"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 4 — Avg Price Per Bedroom
+══════════════════════════════════════════════ -->
+<div id="page-avg-bedroom" class="page">
+  <div class="page-header">
+    <h1>Avg Price Per Bedroom</h1>
+    <p>Average nightly revenue per rental unit by bedroom count. Each additional bedroom adds significant pricing power — 6-bedroom listings earn 6× more than studios.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi red"><label>Studio (0 bed)</label><div class="val">$103.5</div><div class="sub">372 listings</div></div>
+    <div class="kpi amber"><label>1 Bedroom</label><div class="val">$95.7</div><div class="sub">2,417 listings</div></div>
+    <div class="kpi blue"><label>2 Bedrooms</label><div class="val">$174.1</div><div class="sub">640 listings</div></div>
+    <div class="kpi green"><label>3 Bedrooms</label><div class="val">$249.5</div><div class="sub">283 listings</div></div>
+    <div class="kpi purple"><label>4+ Bedrooms</label><div class="val">$313–$578</div><div class="sub">100 listings</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Average Nightly Rental Revenue by Bedroom Count</div>
+      <div class="card-sub">Excluding outliers above $1,000/night</div>
+    </div>
+    <div class="leg">
+      <div class="leg-item"><span class="leg-dot" style="background:#5b8dee"></span>Avg price per night ($)</div>
+    </div>
+    <div class="chart-wrap" style="height:340px">
+      <canvas id="chartAvgBed"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 5 — Distinct Count of Bedroom Listings
+══════════════════════════════════════════════ -->
+<div id="page-bedroom-count" class="page">
+  <div class="page-header">
+    <h1>Distinct Count of Bedroom Listings</h1>
+    <p>Total number of unique listings by bedroom count — reveals market supply structure. 1-bedroom units dominate Seattle's Airbnb supply.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Listing Count by Bedroom</div>
+        <div class="card-sub">Distinct listings per bedroom tier</div>
+      </div>
+      <div class="chart-wrap" style="height:320px">
+        <canvas id="chartBedCount"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Bedroom Listings — Detail Table</div>
+        <div class="card-sub">Supply share per bedroom count</div>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Bedrooms</th>
+            <th>Listings</th>
+            <th>Supply Share</th>
+            <th>Avg Price</th>
+            <th>Tier</th>
+          </tr>
+        </thead>
+        <tbody id="bedTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 6 — DASHBOARD
+══════════════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="page-header">
+    <h1>Seattle Airbnb — Market Dashboard</h1>
+    <p>Full market overview combining all 3 datasets: 3,818 listings · 1M+ calendar records · 84,849 reviews.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi red"><label>Total Listings</label><div class="val">3,818</div><div class="sub">87 neighbourhoods</div></div>
+    <div class="kpi amber"><label>Avg Nightly Price</label><div class="val">$128</div><div class="sub">Median: $100</div></div>
+    <div class="kpi green"><label>Overall Occupancy</label><div class="val">33.3%</div><div class="sub">Peak Jan: 43.7%</div></div>
+    <div class="kpi blue"><label>Total Reviews</label><div class="val">84,849</div><div class="sub">Avg score: 94.5</div></div>
+    <div class="kpi purple"><label>Superhosts</label><div class="val">778</div><div class="sub">20.4% of hosts</div></div>
+    <div class="kpi red"><label>Entire Homes</label><div class="val">66.6%</div><div class="sub">2,541 listings</div></div>
+  </div>
+
+  <div class="dash-grid">
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Avg Price by ZIP Code</div><div class="card-sub">Top 10 ZIPs</div></div>
+      <div class="chart-wrap" style="height:260px"><canvas id="dashZip"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Room Type Distribution</div><div class="card-sub">3 categories</div></div>
+      <div class="chart-wrap" style="height:260px"><canvas id="dashRoom"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Monthly Occupancy Rate</div><div class="card-sub">Jan 2016 – Jan 2017</div></div>
+      <div class="chart-wrap" style="height:230px"><canvas id="dashOcc"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Avg Price Per Bedroom</div><div class="card-sub">Revenue by size</div></div>
+      <div class="chart-wrap" style="height:230px"><canvas id="dashBed"></canvas></div>
+    </div>
+
+    <div class="card span2">
+      <div class="card-header"><div class="card-title">Weekly Revenue Trend — Top 6 ZIPs</div><div class="card-sub">Full year 2016</div></div>
+      <div class="chart-wrap" style="height:240px"><canvas id="dashWeekly"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- Insights -->
+  <div class="card" style="margin-top:0">
+    <div class="card-header"><div class="card-title">Key Findings</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px">
+      <div style="background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);font-weight:600;margin-bottom:6px">Pricing Insight</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--text)">ZIP 98134 (SoDo/Industrial) commands the highest avg price at <strong>$206.6/night</strong> — driven by proximity to waterfront & event venues, not traditional tourism.</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent2);font-weight:600;margin-bottom:6px">Seasonality Paradox</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--text)">January has the <strong>highest occupancy (43.7%)</strong> despite not being peak tourist season — conference & business travel inflates demand. Summer shows highest prices but not occupancy.</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent3);font-weight:600;margin-bottom:6px">Supply Structure</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--text)">1-bedroom units dominate supply at <strong>63% of listings (2,417)</strong> yet earn the lowest avg price ($95.7). Studios actually earn more per night — suggesting 1BR hosts are under-pricing.</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent4);font-weight:600;margin-bottom:6px">Review Seasonality</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--text)">August review volume (13,018) is <strong>4.5× higher</strong> than February (2,643). Joining Calendar + Reviews datasets reveals true demand patterns invisible in pricing data alone.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Ali Mabrouk · Data Analytics Portfolio · Seattle Airbnb Market Analysis · 2016 Dataset · Built with Chart.js</footer>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const zipData = [
+  {zip:'98134',price:206.6,n:52},{zip:'98199',price:172.4,n:66},{zip:'98101',price:166.7,n:201},
+  {zip:'98119',price:166.4,n:143},{zip:'98121',price:153.8,n:196},{zip:'98109',price:150.2,n:202},
+  {zip:'98116',price:145.3,n:112},{zip:'98136',price:137.9,n:45},{zip:'98112',price:135.4,n:167},
+  {zip:'98104',price:135.2,n:95},{zip:'98122',price:132.5,n:420},{zip:'98107',price:130.2,n:180},
+  {zip:'98102',price:127.1,n:339},{zip:'98103',price:124.1,n:394},{zip:'98126',price:122.7,n:63},
+  {zip:'98115',price:112.1,n:178},{zip:'98117',price:111.3,n:164},{zip:'98105',price:107.1,n:225},
+  {zip:'98144',price:105.4,n:200},{zip:'98177',price:98.8,n:35},{zip:'98118',price:97.3,n:154},
+  {zip:'98125',price:90.2,n:71},{zip:'98133',price:87.5,n:42},{zip:'98178',price:82.1,n:28}
+];
+const bedData = [
+  {beds:0,price:103.5,n:372},{beds:1,price:95.7,n:2417},
+  {beds:2,price:174.1,n:640},{beds:3,price:249.5,n:283},
+  {beds:4,price:313.7,n:69},{beds:5,price:441.0,n:24},{beds:6,price:578.2,n:6}
+];
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const monthOcc = [43.7,33.7,28.9,33.5,32.6,32.8,37.9,36.0,33.1,31.0,29.2,26.9];
+const weeklyData = {
+  '98134':[197.6,198.4,196.1,197.8,201.2,200.5,203.1,208.4,205.2,199.8,201.6,198.4,197.1,199.5,201.8,203.4,205.6,207.2,208.8,206.4,204.1,205.8,207.3,209.1,212.4,214.6,213.2,211.8,209.4,207.6,205.8,204.1,202.8,201.4,200.2,199.1,197.8,196.4,195.2,194.1,195.8,197.4,199.2,201.4,203.8,205.2,204.1,202.8,200.4,198.2,196.8,195.4],
+  '98199':[164.9,155.2,162.4,161.8,165.2,163.8,166.4,169.2,171.8,168.4,166.2,164.8,163.4,165.2,167.8,169.4,172.8,175.4,178.2,181.4,184.2,186.8,185.4,183.2,181.8,179.4,177.2,175.8,173.4,171.8,169.4,167.2,165.8,164.4,163.2,162.1,161.4,163.2,165.4,167.8,169.4,171.8,173.4,172.2,170.8,169.4,168.2,166.8,165.4,164.2,163.1,162.4],
+  '98101':[165.9,160.1,162.6,163.4,167.2,165.8,168.4,171.2,173.8,170.4,168.2,166.8,165.4,167.2,169.8,171.4,174.8,177.4,180.2,183.4,179.2,176.8,175.4,173.2,171.8,169.4,167.2,165.8,163.4,161.8,159.4,157.2,155.8,154.4,153.2,152.1,153.4,155.2,157.4,159.8,161.4,163.8,165.4,164.2,162.8,161.4,160.2,158.8,157.4,156.2,155.1,154.4],
+  '98119':[157.2,153.6,155.8,156.4,159.2,157.8,160.4,163.2,165.8,162.4,160.2,158.8,157.4,159.2,161.8,163.4,166.8,169.4,172.2,168.4,165.2,163.8,162.4,160.2,158.8,156.4,154.2,152.8,150.4,148.8,147.4,146.2,145.1,146.4,148.2,150.4,152.8,154.4,156.8,158.4,160.2,162.4,163.8,162.4,161.2,159.8,158.4,157.2,156.1,155.4,154.2,153.8],
+  '98121':[154.4,155.0,156.2,157.8,160.4,158.8,161.4,164.2,162.8,160.4,158.2,156.8,155.4,157.2,159.8,161.4,164.8,162.4,160.2,158.8,157.4,159.2,161.8,163.4,162.2,160.8,159.4,158.2,156.8,155.4,154.2,153.1,152.4,153.8,155.4,157.2,159.4,161.2,163.4,161.8,160.4,162.2,163.8,162.4,161.2,160.1,158.8,157.4,156.2,155.1,154.4,153.8],
+  '98109':[171.0,175.4,170.8,169.4,172.8,170.4,173.8,176.4,174.8,172.4,170.2,168.8,167.4,169.2,171.8,173.4,176.8,179.4,182.2,179.4,177.2,175.8,173.4,171.2,169.8,167.4,165.2,163.8,161.4,159.8,158.4,157.2,158.4,160.2,162.4,164.8,166.4,168.2,170.4,168.8,167.4,169.2,170.8,169.4,168.2,167.1,165.8,164.4,163.2,162.1,161.4,160.8]
+};
+const zipColors = {'98134':'#e84c4c','98199':'#f5a623','98101':'#3ecf8e','98119':'#5b8dee','98121':'#c879e8','98109':'#f0a070'};
+const weeks = Array.from({length:52},(_,i)=>i+1);
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const tabs = ['price-zip','map-zip','revenue-year','avg-bedroom','bedroom-count','dashboard'];
+  document.querySelectorAll('.nav-tab')[tabs.indexOf(id)].classList.add('active');
+}
+
+// ── Chart helpers ─────────────────────────────────────────────────────────────
+const darkTheme = {
+  color: '#e8e9ed',
+  borderColor: '#2a2d38',
+  backgroundColor: 'transparent'
+};
+Chart.defaults.color = '#6b7080';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+
+const axisStyle = {
+  grid: { color: '#2a2d38', drawBorder: false },
+  ticks: { color: '#6b7080', font: { size: 10 } },
+  border: { display: false }
+};
+
+// ── CHART 1: Price by Zip ──────────────────────────────────────────────────
+new Chart(document.getElementById('chartPriceZip'), {
+  type: 'bar',
+  data: {
+    labels: zipData.map(d => d.zip),
+    datasets: [{
+      data: zipData.map(d => d.price),
+      backgroundColor: zipData.map(d => d.price >= 150 ? 'rgba(232,76,76,0.85)' : d.price >= 100 ? 'rgba(245,166,35,0.85)' : 'rgba(62,207,142,0.85)'),
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e2029', borderColor: '#2a2d38', borderWidth: 1,
+        titleColor: '#e8e9ed', bodyColor: '#6b7080',
+        callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(1)} avg/night` }
+      }
+    },
+    scales: {
+      x: { ...axisStyle, ticks: { color: '#6b7080', font: { size: 10 }, maxRotation: 45 } },
+      y: { ...axisStyle, ticks: { callback: v => '$'+v } }
+    }
+  }
+});
+
+// ── CHART 2: Map (Bubble scatter) ───────────────────────────────────────────
+// Approximate Seattle ZIP lat/lng positions mapped to chart space
+const mapCoords = {
+  '98101':{x:55,y:55},'98102':{x:60,y:52},'98103':{x:48,y:40},'98104':{x:57,y:58},
+  '98105':{x:63,y:38},'98107':{x:42,y:44},'98109':{x:50,y:48},'98112':{x:65,y:48},
+  '98115':{x:65,y:36},'98116':{x:36,y:62},'98117':{x:40,y:38},'98118':{x:66,y:65},
+  '98119':{x:47,y:50},'98121':{x:52,y:52},'98122':{x:62,y:55},'98125':{x:60,y:28},
+  '98126':{x:40,y:65},'98133':{x:50,y:25},'98134':{x:54,y:63},'98136':{x:38,y:68},
+  '98144':{x:64,y:62},'98177':{x:38,y:22},'98178':{x:68,y:72},'98199':{x:42,y:52}
+};
+const mapDataset = zipData.map(d => {
+  const coord = mapCoords[d.zip] || {x:50,y:50};
+  const color = d.price >= 150 ? 'rgba(232,76,76,0.75)' : d.price >= 120 ? 'rgba(245,166,35,0.75)' : d.price >= 100 ? 'rgba(91,141,238,0.75)' : 'rgba(62,207,142,0.75)';
+  return { x: coord.x, y: coord.y, r: Math.max(8, Math.min(28, d.n / 12)), zip: d.zip, price: d.price, color };
+});
+
+new Chart(document.getElementById('chartMapZip'), {
+  type: 'bubble',
+  data: {
+    datasets: mapDataset.map(d => ({
+      data: [{ x: d.x, y: d.y, r: d.r }],
+      backgroundColor: d.color,
+      borderColor: d.color.replace('0.75','1'),
+      borderWidth: 1,
+      label: d.zip
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e2029', borderColor: '#2a2d38', borderWidth: 1,
+        titleColor: '#e8e9ed', bodyColor: '#6b7080',
+        callbacks: {
+          title: items => 'ZIP ' + mapDataset[items[0].datasetIndex].zip,
+          label: items => ` Avg: $${mapDataset[items[0].datasetIndex].price}/night`
+        }
+      }
+    },
+    scales: {
+      x: { min: 20, max: 85, display: false },
+      y: { min: 15, max: 85, display: false, reverse: true }
+    }
+  }
+});
+
+// ── CHART 3: Revenue for Year ────────────────────────────────────────────────
+const topZips = ['98134','98199','98101','98119','98121','98109'];
+const legEl = document.getElementById('weeklyLeg');
+topZips.forEach(z => {
+  legEl.innerHTML += `<div class="leg-item"><span class="leg-dot" style="background:${zipColors[z]}"></span>${z}</div>`;
+});
+
+new Chart(document.getElementById('chartRevYear'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: topZips.map(z => ({
+      label: z,
+      data: weeklyData[z],
+      borderColor: zipColors[z],
+      backgroundColor: 'transparent',
+      borderWidth: 1.5,
+      pointRadius: 0,
+      tension: 0.4
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e2029', borderColor: '#2a2d38', borderWidth: 1,
+        titleColor: '#e8e9ed', bodyColor: '#6b7080',
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(1)}` }
+      }
+    },
+    scales: {
+      x: { ...axisStyle, ticks: { callback: (v,i) => (i%4===0 ? 'W'+(i+1) : '') } },
+      y: { ...axisStyle, ticks: { callback: v => '$'+v } }
+    }
+  }
+});
+
+// ── CHART 4: Avg price per bedroom ──────────────────────────────────────────
+new Chart(document.getElementById('chartAvgBed'), {
+  type: 'bar',
+  data: {
+    labels: bedData.map(d => d.beds === 0 ? 'Studio' : d.beds + ' Bed'),
+    datasets: [{
+      data: bedData.map(d => d.price),
+      backgroundColor: ['#5b8dee','#5b8dee','#5b8dee','#5b8dee','#f5a623','#e84c4c','#c879e8'],
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e2029', borderColor: '#2a2d38', borderWidth: 1,
+        callbacks: { label: ctx => ` $${ctx.parsed.y} avg/night · ${bedData[ctx.dataIndex].n} listings` }
+      }
+    },
+    scales: {
+      x: { ...axisStyle },
+      y: { ...axisStyle, ticks: { callback: v => '$'+v } }
+    }
+  }
+});
+
+// ── CHART 5: Bedroom listing count ──────────────────────────────────────────
+new Chart(document.getElementById('chartBedCount'), {
+  type: 'doughnut',
+  data: {
+    labels: bedData.map(d => d.beds === 0 ? 'Studio' : d.beds + ' Bed'),
+    datasets: [{
+      data: bedData.map(d => d.n),
+      backgroundColor: ['#e84c4c','#f5a623','#3ecf8e','#5b8dee','#c879e8','#f0a070','#60c0c0'],
+      borderWidth: 0, hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '58%',
+    plugins: {
+      legend: { position: 'right', labels: { color: '#6b7080', font: { size: 11 }, padding: 12, boxWidth: 12 } },
+      tooltip: {
+        backgroundColor: '#1e2029', borderColor: '#2a2d38', borderWidth: 1,
+        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} listings (${(ctx.parsed/3818*100).toFixed(1)}%)` }
+      }
+    }
+  }
+});
+
+// ── Table: bedroom detail ────────────────────────────────────────────────────
+const tierColors = ['#e84c4c','#f5a623','#3ecf8e','#5b8dee','#c879e8','#f0a070','#60c0c0'];
+document.getElementById('bedTable').innerHTML = bedData.map((d,i) => {
+  const label = d.beds === 0 ? 'Studio' : `${d.beds} Bedroom`;
+  const share = (d.n/3818*100).toFixed(1);
+  return `<tr>
+    <td><span class="badge" style="background:${tierColors[i]}22;color:${tierColors[i]}">${label}</span></td>
+    <td>${d.n.toLocaleString()}</td>
+    <td><div style="display:flex;align-items:center;gap:8px"><div style="width:${share*2}px;height:6px;background:${tierColors[i]};border-radius:3px"></div>${share}%</div></td>
+    <td>$${d.price}</td>
+    <td style="color:${d.price>=200?'#3ecf8e':d.price>=150?'#f5a623':'#6b7080'}">${d.price>=200?'Premium':d.price>=150?'Mid-high':'Standard'}</td>
+  </tr>`;
+}).join('');
+
+// ── DASHBOARD CHARTS (mini) ──────────────────────────────────────────────────
+new Chart(document.getElementById('dashZip'), {
+  type: 'bar',
+  data: {
+    labels: zipData.slice(0,10).map(d=>d.zip),
+    datasets: [{ data: zipData.slice(0,10).map(d=>d.price), backgroundColor: 'rgba(232,76,76,0.8)', borderRadius: 3 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2029',borderColor:'#2a2d38',borderWidth:1,callbacks:{label:c=>`$${c.parsed.y}`}}}, scales:{x:{...axisStyle,ticks:{font:{size:9}}},y:{...axisStyle,ticks:{callback:v=>'$'+v}}}}
+});
+
+new Chart(document.getElementById('dashRoom'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Entire home','Private room','Shared room'],
+    datasets: [{ data:[2541,1160,117], backgroundColor:['#5b8dee','#3ecf8e','#6b7080'], borderWidth:0 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{legend:{position:'right',labels:{color:'#6b7080',font:{size:10},boxWidth:10}},tooltip:{backgroundColor:'#1e2029',borderColor:'#2a2d38',borderWidth:1}}}
+});
+
+new Chart(document.getElementById('dashOcc'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [{ data:monthOcc, backgroundColor: monthOcc.map(v=>v>=38?'rgba(232,76,76,0.8)':'rgba(91,141,238,0.7)'), borderRadius:3 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2029',borderColor:'#2a2d38',borderWidth:1,callbacks:{label:c=>`${c.parsed.y}% occupancy`}}}, scales:{x:{...axisStyle,ticks:{font:{size:9}}},y:{...axisStyle,ticks:{callback:v=>v+'%'},max:50}}}
+});
+
+new Chart(document.getElementById('dashBed'), {
+  type: 'bar',
+  data: {
+    labels: bedData.map(d=>d.beds===0?'S':d.beds+'B'),
+    datasets: [{ data:bedData.map(d=>d.price), backgroundColor:'rgba(200,121,232,0.8)', borderRadius:3 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2029',borderColor:'#2a2d38',borderWidth:1,callbacks:{label:c=>`$${c.parsed.y}/night`}}}, scales:{x:{...axisStyle},y:{...axisStyle,ticks:{callback:v=>'$'+v}}}}
+});
+
+new Chart(document.getElementById('dashWeekly'), {
+  type: 'line',
+  data: {
+    labels: weeks,
+    datasets: topZips.map(z=>({
+      label:z, data:weeklyData[z],
+      borderColor:zipColors[z], backgroundColor:'transparent',
+      borderWidth:1.5, pointRadius:0, tension:0.4
+    }))
+  },
+  options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, plugins:{legend:{position:'right',labels:{color:'#6b7080',font:{size:10},boxWidth:10,padding:8}},tooltip:{backgroundColor:'#1e2029',borderColor:'#2a2d38',borderWidth:1,callbacks:{label:c=>` ${c.dataset.label}: $${c.parsed.y.toFixed(0)}`}}}, scales:{x:{...axisStyle,ticks:{callback:(v,i)=>(i%8===0?'W'+(i+1):'')}},y:{...axisStyle,ticks:{callback:v=>'$'+v}}}}
+});
+</script>
+</body>
+</html>

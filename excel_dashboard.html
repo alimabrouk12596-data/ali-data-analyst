@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel Projects — Ali Mabrouk</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#0f0a00;--surface:#181100;--surface2:#211900;--border:#2e2000;--text:#f0e8d0;--muted:#7a6840;--amber:#f59e0b;--green:#22c55e;--blue:#3b82f6;--red:#ef4444;--teal:#14b8a6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;}
+nav{background:rgba(15,10,0,.95);border-bottom:1px solid var(--border);padding:0 2rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.nav-brand{font-family:'DM Mono',monospace;font-size:13px;color:var(--amber);letter-spacing:.05em;}
+.tabs{display:flex;gap:2px;}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 12px;cursor:pointer;transition:.2s;}
+.tab:hover{color:var(--text);}.tab.active{color:var(--text);border-bottom-color:var(--amber);}
+.back{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;transition:.2s;}.back:hover{color:var(--amber);}
+.page{display:none;padding:2rem;max-width:1280px;margin:0 auto;animation:fi .3s ease;}.page.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:1.75rem;}.ph h1{font-size:26px;font-weight:700;letter-spacing:-.5px;}.ph p{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.6;max-width:600px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.a::before{background:var(--amber)}.kpi.g::before{background:var(--green)}.kpi.b::before{background:var(--blue)}.kpi.r::before{background:var(--red)}.kpi.t::before{background:var(--teal)}
+.kpi label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;}
+.kpi .val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;}.kpi .sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;}
+.ct{font-size:13px;font-weight:600;margin-bottom:3px;}.cs{font-size:11px;color:var(--muted);margin-bottom:1rem;}
+.cw{position:relative;width:100%;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+
+/* Spreadsheet simulation */
+.sheet{border:1px solid var(--border);border-radius:8px;overflow:hidden;font-family:'DM Mono',monospace;font-size:11px;}
+.sheet-header{background:var(--surface2);padding:8px 12px;font-size:10px;color:var(--amber);letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.sheet table{width:100%;border-collapse:collapse;}
+.sheet th{background:var(--surface2);padding:6px 10px;font-size:10px;color:var(--muted);font-weight:600;border-right:1px solid var(--border);border-bottom:1px solid var(--border);text-align:center;}
+.sheet td{padding:6px 10px;border-right:1px solid var(--border);border-bottom:1px solid rgba(46,32,0,.5);text-align:right;}
+.sheet td.label{text-align:left;color:var(--text);}
+.sheet td.formula{color:var(--amber);}
+.sheet td.result{color:var(--green);font-weight:600;}
+.sheet td.high{background:rgba(245,158,11,.12);color:var(--amber);}
+.sheet td.low{background:rgba(239,68,68,.1);color:var(--red);}
+.sheet tr:hover td{background:rgba(245,158,11,.05);}
+
+/* Conditional formatting visual */
+.cf-bar{display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid rgba(46,32,0,.4);}
+.cf-label{font-family:'DM Mono',monospace;font-size:11px;width:140px;flex-shrink:0;}
+.cf-track{flex:1;height:20px;border-radius:3px;overflow:hidden;background:var(--surface2);}
+.cf-fill{height:100%;display:flex;align-items:center;padding-left:6px;font-size:10px;font-family:'DM Mono',monospace;color:rgba(0,0,0,.7);font-weight:600;}
+
+/* President table */
+.clean-tag{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;}
+.clean-before{background:rgba(239,68,68,.15);color:#ef4444;}
+.clean-after{background:rgba(34,197,94,.15);color:#22c55e;}
+
+footer{text-align:center;padding:2.5rem;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;border-top:1px solid var(--border);margin-top:2rem;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">📊 Excel Projects — Ali Mabrouk</div>
+  <div class="tabs">
+    <button class="tab active" onclick="show('bike')">Bike Buyers</button>
+    <button class="tab" onclick="show('sales')">Sales Dashboard</button>
+    <button class="tab" onclick="show('clean')">Data Cleaning</button>
+    <button class="tab" onclick="show('formulas')">Formulas</button>
+  </div>
+  <a href="index.html" class="back">← Portfolio</a>
+</nav>
+
+<!-- ═══ BIKE BUYERS ═══ -->
+<div id="p-bike" class="page active">
+  <div class="ph"><h1>Bike Buyers — Customer Analysis</h1><p>Analysis of 1,000+ customer records across income, age, education, and commute distance. Built with Pivot Tables and interactive Slicers.</p></div>
+  <div class="kpis">
+    <div class="kpi a"><label>Customers</label><div class="val">1,000</div><div class="sub">Dataset size</div></div>
+    <div class="kpi g"><label>Buyers</label><div class="val">481</div><div class="sub">48.1% purchased</div></div>
+    <div class="kpi b"><label>Top Region</label><div class="val">N. America</div><div class="sub">Highest volume</div></div>
+    <div class="kpi r"><label>Sweet Spot</label><div class="val">0–1 mi</div><div class="sub">Commute = peak buy</div></div>
+    <div class="kpi t"><label>Income Range</label><div class="val">$10K–$170K</div><div class="sub">Customer spread</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Bike Purchase by Region</div><div class="cs">Buyers vs Non-buyers per region</div>
+      <div class="cw" style="height:260px"><canvas id="c1"></canvas></div></div>
+    <div class="card"><div class="ct">Purchase Rate by Commute Distance</div><div class="cs">Shorter commutes = higher purchase rate</div>
+      <div class="cw" style="height:260px"><canvas id="c2"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="ct">Purchase by Age Bracket</div><div class="cs">Middle age group dominates purchases</div>
+      <div class="cw" style="height:240px"><canvas id="c3"></canvas></div></div>
+    <div class="card"><div class="ct">Avg Income — Buyers vs Non-Buyers</div><div class="cs">Income influence on purchase decision</div>
+      <div class="cw" style="height:240px"><canvas id="c4"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ═══ DUNDER MIFFLIN SALES ═══ -->
+<div id="p-sales" class="page">
+  <div class="ph"><h1>Dunder Mifflin Sales Dashboard</h1><p>12-month sales report for Paper, Printers, and Manila Folders with conditional formatting highlights and year-end totals.</p></div>
+  <div class="kpis">
+    <div class="kpi a"><label>Paper Total</label><div class="val">5,071</div><div class="sub">Units sold</div></div>
+    <div class="kpi b"><label>Folders Total</label><div class="val">1,583</div><div class="sub">Units sold</div></div>
+    <div class="kpi g"><label>Printers Total</label><div class="val">667</div><div class="sub">Units sold</div></div>
+    <div class="kpi r"><label>Peak Month</label><div class="val">September</div><div class="sub">Paper: 736 units</div></div>
+  </div>
+  <div class="card"><div class="ct">Monthly Sales — All Products</div><div class="cs">Paper · Printers · Manila Folders — 12 months</div>
+    <div class="cw" style="height:300px"><canvas id="c5"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Annual Sales Share</div><div class="cs">% of total units by product</div>
+      <div class="cw" style="height:240px"><canvas id="c6"></canvas></div></div>
+    <div class="card"><div class="ct">Conditional Formatting — Sales Heatmap</div><div class="cs">Visual recreation of Excel CF rules applied to monthly data</div>
+      <div style="margin-top:.5rem">
+        <div class="cf-bar"><div class="cf-label">Paper — Sep</div><div class="cf-track"><div class="cf-fill" style="width:100%;background:linear-gradient(90deg,#f59e0b,#ef4444)">736 🔥 PEAK</div></div></div>
+        <div class="cf-bar"><div class="cf-label">Paper — Apr</div><div class="cf-track"><div class="cf-fill" style="width:100%;background:#f59e0b99">750 ★</div></div></div>
+        <div class="cf-bar"><div class="cf-label">Paper — Jul</div><div class="cf-track"><div class="cf-fill" style="width:69%;background:#22c55e88">510</div></div></div>
+        <div class="cf-bar"><div class="cf-label">Paper — May</div><div class="cf-track"><div class="cf-fill" style="width:60%;background:#3b82f688">440</div></div></div>
+        <div class="cf-bar"><div class="cf-label">Paper — Mar</div><div class="cf-track"><div class="cf-fill" style="width:20%;background:#ef444488">150 ↓</div></div></div>
+        <div style="padding:8px 10px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Color scale: 🔴 Low → 🟡 Mid → 🟢 High (Excel CF rule applied)</div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><div class="ct">Spreadsheet Preview — Dunder Mifflin Sales Report</div><div class="cs">Actual data structure with conditional formatting applied</div>
+    <div class="sheet" style="margin-top:.5rem">
+      <div class="sheet-header">📊 Dunder Mifflin Sales Report — Excel Simulation</div>
+      <table>
+        <thead><tr><th>Product</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th>Year Total</th></tr></thead>
+        <tbody>
+          <tr><td class="label">Paper</td><td>450</td><td>310</td><td class="low">150</td><td class="high">750</td><td>440</td><td>485</td><td>510</td><td>347</td><td class="high">736</td><td class="low">155</td><td>450</td><td>288</td><td class="result">5,071</td></tr>
+          <tr><td class="label">Printer</td><td>75</td><td>40</td><td>65</td><td>50</td><td>24</td><td>71</td><td>57</td><td>61</td><td>34</td><td>41</td><td>58</td><td>91</td><td class="result">667</td></tr>
+          <tr><td class="label">Manila Folder</td><td>200</td><td>118</td><td>145</td><td>210</td><td class="low">45</td><td>170</td><td>130</td><td>90</td><td class="low">55</td><td>110</td><td>130</td><td>180</td><td class="result">1,583</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DATA CLEANING ═══ -->
+<div id="p-clean" class="page">
+  <div class="ph"><h1>US Presidents — Data Cleaning</h1><p>Professional data cleaning on a historical dataset — removing duplicates, fixing date formats, standardizing party names using TRIM and text functions.</p></div>
+  <div class="kpis">
+    <div class="kpi r"><label>Issues Found</label><div class="val">4 types</div><div class="sub">Duplicates, dates, whitespace, formatting</div></div>
+    <div class="kpi g"><label>Records</label><div class="val">45</div><div class="sub">US Presidents</div></div>
+    <div class="kpi a"><label>Duplicate</label><div class="val">1 removed</div><div class="sub">Woodrow Wilson</div></div>
+    <div class="kpi b"><label>Date Fix</label><div class="val">Serial→Date</div><div class="sub">Excel serials converted</div></div>
+  </div>
+  <div class="card"><div class="ct">Data Issues Found & Fixed</div><div class="cs">Before vs After cleaning — each issue type</div>
+    <div class="cw" style="height:240px"><canvas id="c7"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Before Cleaning — Raw Data Issues</div><div class="cs">Problems identified in original dataset</div>
+      <div style="margin-top:.5rem">
+        <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:1rem;margin-bottom:.75rem">
+          <div style="font-size:11px;color:#ef4444;font-weight:600;margin-bottom:.5rem">❌ Issues Found</div>
+          <div style="font-size:12px;color:var(--muted);line-height:2;font-family:'DM Mono',monospace">
+            → Duplicate row: Woodrow Wilson (row 28 & 29)<br>
+            → Date stored as Excel serial: 44756 instead of 14-Jul-21<br>
+            → Party names with extra spaces: "Democratic-  Republican"<br>
+            → Inconsistent capitalization in party column<br>
+            → Trailing whitespace in president names
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="ct">After Cleaning — Fixed Data</div><div class="cs">Techniques applied in Excel</div>
+      <div style="margin-top:.5rem">
+        <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:1rem">
+          <div style="font-size:11px;color:#22c55e;font-weight:600;margin-bottom:.5rem">✅ Fixes Applied</div>
+          <div style="font-size:12px;color:var(--muted);line-height:2;font-family:'DM Mono',monospace">
+            → Removed duplicate using: Remove Duplicates tool<br>
+            → Fixed dates using: TEXT(A2,"DD-MMM-YY")<br>
+            → Trimmed whitespace: =TRIM(party_column)<br>
+            → Standardized party names: =PROPER(TRIM(A2))<br>
+            → Documented all steps for reproducibility
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card"><div class="ct">Party Distribution — After Cleaning</div><div class="cs">Clean political party breakdown across 45 presidents</div>
+    <div class="cw" style="height:240px"><canvas id="c8"></canvas></div></div>
+</div>
+
+<!-- ═══ FORMULAS ═══ -->
+<div id="p-formulas" class="page">
+  <div class="ph"><h1>Advanced Excel Formulas</h1><p>XLOOKUP, INDEX/MATCH, IF/IFS, SUMIF, COUNTIF and more — demonstrated on the Dunder Mifflin HR dataset.</p></div>
+  <div class="kpis">
+    <div class="kpi a"><label>Formulas Used</label><div class="val">15+</div><div class="sub">Advanced functions</div></div>
+    <div class="kpi g"><label>XLOOKUP</label><div class="val">3 modes</div><div class="sub">Exact, partial, multi-col</div></div>
+    <div class="kpi b"><label>Dataset</label><div class="val">9 employees</div><div class="sub">HR records</div></div>
+    <div class="kpi r"><label>Error Handling</label><div class="val">if_not_found</div><div class="sub">Graceful fallback</div></div>
+  </div>
+  <div class="card"><div class="ct">Salary Distribution — Employee Dataset</div><div class="cs">MAX/MIN/AVERAGE applied across HR data</div>
+    <div class="cw" style="height:240px"><canvas id="c9"></canvas></div></div>
+  <div class="g2">
+    <div class="card"><div class="ct">Formula Reference Sheet — XLOOKUP</div><div class="cs">Interactive formula preview</div>
+      <div class="sheet" style="margin-top:.5rem">
+        <div class="sheet-header">XLOOKUP — HR Lookup System</div>
+        <table>
+          <thead><tr><th>Formula</th><th>Lookup</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td class="formula">=XLOOKUP(1001,ID,Name)</td><td>EmployeeID 1001</td><td class="result">Jim Halpert</td></tr>
+            <tr><td class="formula">=XLOOKUP(1002,ID,Salary)</td><td>EmployeeID 1002</td><td class="result">$36,000</td></tr>
+            <tr><td class="formula">=XLOOKUP("Pam*",Name,Email,,-1)</td><td>Wildcard match</td><td class="result">Pam.Beasley@...</td></tr>
+            <tr><td class="formula">=XLOOKUP(9999,ID,Name,"Not found")</td><td>Missing ID</td><td class="result" style="color:var(--muted)">Not found</td></tr>
+            <tr><td class="formula">=XLOOKUP(1003,ID,A:D)</td><td>Multi-column</td><td class="result">Dwight, Schrute...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card"><div class="ct">Formula Reference Sheet — IF / SUMIF</div><div class="cs">Conditional logic applied to HR data</div>
+      <div class="sheet" style="margin-top:.5rem">
+        <div class="sheet-header">IF / SUMIF / COUNTIF</div>
+        <table>
+          <thead><tr><th>Formula</th><th>Condition</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td class="formula">=IF(Salary>50000,"Senior","Junior")</td><td>Salary>50K</td><td class="result">Senior/Junior</td></tr>
+            <tr><td class="formula">=IFS(Job="Sales","SALES",...)</td><td>Multi-condition</td><td class="result">Role category</td></tr>
+            <tr><td class="formula">=SUMIF(Gender,"Male",Salary)</td><td>Male salaries</td><td class="result">$218,000</td></tr>
+            <tr><td class="formula">=COUNTIF(Job,"Salesman")</td><td>Count salesmen</td><td class="result">2</td></tr>
+            <tr><td class="formula">=MAX(Salary)-MIN(Salary)</td><td>Salary range</td><td class="result">$29,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Ali Mabrouk · Data Analytics Portfolio · Excel Projects · Bike Buyers · Sales · Data Cleaning · Advanced Formulas · Built with Chart.js</footer>
+
+<script>
+const AM='#f59e0b',G='#22c55e',B='#3b82f6',R='#ef4444',T='#14b8a6',MU='#7a6840';
+Chart.defaults.color=MU;Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=11;
+const ax={grid:{color:'#2e2000',drawBorder:false},ticks:{color:MU,font:{size:10}},border:{display:false}};
+const tt={backgroundColor:'#181100',borderColor:'#2e2000',borderWidth:1,titleColor:'#f0e8d0',bodyColor:MU};
+
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  ['bike','sales','clean','formulas'].forEach((t,i)=>{if(t===id)document.querySelectorAll('.tab')[i].classList.add('active');});
+}
+
+// Bike buyers charts
+new Chart(document.getElementById('c1'),{type:'bar',data:{labels:['North America','Europe','Pacific'],datasets:[{label:'Bought Bike',data:[224,156,101],backgroundColor:G+'bb',borderRadius:3},{label:'No Purchase',data:[218,174,127],backgroundColor:MU+'55',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:MU,boxWidth:12}},tooltip:{...tt,mode:'index',intersect:false}},scales:{x:{...ax},y:{...ax}}}});
+new Chart(document.getElementById('c2'),{type:'bar',data:{labels:['0–1 mile','2–5 miles','5–10 miles','10+ miles','No commute'],datasets:[{data:[68,42,31,22,17],backgroundColor:[G,G+'99',AM+'88',B+'77',MU+'55'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` Purchase rate: ${c.parsed.y}%`}}},scales:{x:{...ax,ticks:{...ax.ticks,font:{size:10}}},y:{...ax,ticks:{...ax.ticks,callback:v=>v+'%'}}}}});
+new Chart(document.getElementById('c3'),{type:'doughnut',data:{labels:['Middle Age (31-54)','Young Adult (<31)','Senior (55+)'],datasets:[{data:[54,24,22],backgroundColor:[AM,G,B],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:10}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed}%`}}}}});
+new Chart(document.getElementById('c4'),{type:'bar',data:{labels:['Male Buyer','Female Buyer','Male Non-buyer','Female Non-buyer'],datasets:[{data:[60000,55000,45000,41000],backgroundColor:[G+'bb',G+'88',MU+'55',MU+'33'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` Avg income: $${(c.parsed.y/1000).toFixed(0)}K`}}},scales:{x:{...ax,ticks:{...ax.ticks,font:{size:9}}},y:{...ax,ticks:{...ax.ticks,callback:v=>'$'+(v/1000)+'K'}}}}});
+
+// Sales charts
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+new Chart(document.getElementById('c5'),{type:'bar',data:{labels:months,datasets:[{label:'Paper',data:[450,310,150,750,440,485,510,347,736,155,450,288],backgroundColor:AM+'bb',borderRadius:2},{label:'Manila Folder',data:[200,118,145,210,45,170,130,90,55,110,130,180],backgroundColor:B+'bb',borderRadius:2},{label:'Printer',data:[75,40,65,50,24,71,57,61,34,41,58,91],backgroundColor:G+'bb',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:MU,boxWidth:12}},tooltip:{...tt,mode:'index',intersect:false}},scales:{x:{...ax},y:{...ax}}}});
+new Chart(document.getElementById('c6'),{type:'doughnut',data:{labels:['Paper','Manila Folder','Printer'],datasets:[{data:[5071,1583,667],backgroundColor:[AM,B,G],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:10}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed} units (${(c.parsed/7321*100).toFixed(1)}%)`}}}}});
+
+// Cleaning charts
+new Chart(document.getElementById('c7'),{type:'bar',data:{labels:['Duplicates','Date Format','Whitespace','Party Name','Capitalization'],datasets:[{label:'Issues Fixed',data:[1,12,8,6,4],backgroundColor:G+'bb',borderRadius:4},{label:'Still Present',data:[0,0,0,0,0],backgroundColor:R+'44',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:MU,boxWidth:12}},tooltip:{...tt,mode:'index',intersect:false}},scales:{x:{...ax},y:{...ax}}}});
+new Chart(document.getElementById('c8'),{type:'doughnut',data:{labels:['Republican','Democratic','Democratic-Republican','Whig','Federalist','Nonpartisan'],datasets:[{data:[19,15,4,4,1,1],backgroundColor:[R,B,AM,G,T,MU],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{color:MU,boxWidth:12,padding:10,font:{size:10}}},tooltip:{...tt,callbacks:{label:c=>` ${c.label}: ${c.parsed} presidents`}}}}});
+
+// Formula charts
+const employees=['Jim','Pam','Dwight','Michael','Toby','Angela','Kevin','Stanley','Darryl'];
+const salaries=[45000,36000,63000,65000,50000,42000,38000,52000,48000];
+new Chart(document.getElementById('c9'),{type:'bar',data:{labels:employees,datasets:[{data:salaries,backgroundColor:salaries.map(v=>v>=63000?G+'cc':v>=50000?AM+'cc':B+'88'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>` Salary: $${c.parsed.y.toLocaleString()}`}}},scales:{x:{...ax},y:{...ax,ticks:{...ax.ticks,callback:v=>'$'+(v/1000)+'K'}}}}});
+</script>
+
+<script>
+// Auto-switch tab based on URL hash
+(function(){
+  const hash = window.location.hash.replace('#','');
+  const validTabs = ['bike','sales','clean','formulas'];
+  if(validTabs.includes(hash)) show(hash);
+})();
+</script>
+</body>
+</html>
